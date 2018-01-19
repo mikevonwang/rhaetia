@@ -4,7 +4,7 @@ Rhaetia is a lightweight router for React.
 
 ## Installation
 
-`npm install rhaetia --save-dev`
+`npm install rhaetia --save`
 
 ## Usage and Example
 

@@ -63,7 +63,7 @@ export default class Rhaetia {
     return route_array;
   }
 
-  findRoute(props, is_authenticated) {
+  match(props, is_authenticated) {
     let child = null;
     if (typeof props !== 'object' || props === null) {
       props = {};
@@ -91,10 +91,10 @@ export default class Rhaetia {
       }
       if (is_match === true) {
         if (is_authenticated === false && locked === true) {
-          child = 401;
+          child = 1;
         }
         else if (is_authenticated === true && locked === false) {
-          child = 402;
+          child = -1;
         }
         else {
           for (let j=hierarchy.length-1; j>=0; j--) {

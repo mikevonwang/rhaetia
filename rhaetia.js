@@ -1,4 +1,5 @@
-import {createElement} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import createHistory from 'history/createBrowserHistory';
 
 export default class Rhaetia {
@@ -100,7 +101,7 @@ export default class Rhaetia {
           for (let j=hierarchy.length-1; j>=0; j--) {
             let Node = hierarchy[j];
             props.params = params;
-            child = createElement(Node, props, child);
+            child = React.createElement(Node, props, child);
           }
         }
         break;
@@ -109,4 +110,28 @@ export default class Rhaetia {
     return child;
   }
 
-}
+};
+
+export class A extends React.Component {
+
+  constructor(props) {
+    super(props);
+  }
+
+  goto(e) {
+    e.preventDefault();
+    this.context.router.push(this.props.href);
+  }
+
+  render() {
+    return React.createElement('a', {
+      href: this.props.href,
+      className: this.props.className,
+      onClick: (e) => this.goto(e),
+    }, this.props.children);
+  }
+};
+
+A.contextTypes = {
+  router: PropTypes.instanceOf(Rhaetia),
+};

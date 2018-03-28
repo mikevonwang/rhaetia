@@ -111,7 +111,7 @@ Creates a new Rhaetia router. This should be called in the `constructor()` funct
 
 An array detailing every route in the app.
 
-Every item in the array must be a `route_branch` array. These arrays must be ordered from most specific to most general, i.e. routes with url parameters should appear after routes without wildcards. For example:
+Every item in the array must be a `route_branch` array. These arrays must be ordered from most specific to most general, i.e. routes with url parameters should appear after routes without them. For example:
 
 ```javascript
 const route_tree = [

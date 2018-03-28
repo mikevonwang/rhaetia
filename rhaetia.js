@@ -8,6 +8,7 @@ export default class Rhaetia {
     this.history = createHistory();
     this.routes = this.setRoutes(route_tree);
     this.path = this.getLocation();
+    this.query = this.getQuery();
     this.push = this.history.push;
     this.replace = this.history.replace;
     this.location = this.history.location;
@@ -22,6 +23,17 @@ export default class Rhaetia {
 
   getLocation() {
     return window.location.pathname.substring(1).split('/');
+  }
+
+  getQuery() {
+    let query = {};
+    location.search.substring(1).split('&').forEach((c) => {
+      let pair = c.split('=');
+      if (pair.length === 2) {
+        query[pair[0]] = pair[1];
+      }
+    });
+    return query;
   }
 
   setRoutes(route_tree, trunk, hierarchy, locked) {

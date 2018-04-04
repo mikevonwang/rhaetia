@@ -8,7 +8,6 @@ export default class Rhaetia {
     this.history = createHistory();
     this.routes = this.setRoutes(route_tree);
     this.path = this.getLocation();
-    this.query = this.getQuery();
     this.push = this.history.push;
     this.replace = this.history.replace;
     this.location = this.history.location;
@@ -81,6 +80,7 @@ export default class Rhaetia {
     if (typeof props !== 'object' || props === null) {
       props = {};
     }
+    const query = this.getQuery();
     for (let i=0; i<this.routes.length; i++) {
       const route = this.routes[i];
       const route_path = route[0].split('/');
@@ -113,6 +113,7 @@ export default class Rhaetia {
           for (let j=hierarchy.length-1; j>=0; j--) {
             let Node = hierarchy[j];
             props.params = params;
+            props.query = query;
             child = React.createElement(Node, props, child);
           }
         }

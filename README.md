@@ -130,22 +130,33 @@ A 2-4 element array detailing a single route in the app. The elements are, in or
 
 Used to match routes to the url.
 
-If the parameter contains `/` characters, the parameter is split along those characters, and each piece compared individually.
+If the `route_path` contains `/` characters, it is split along those characters, and each piece compared individually.
 
 * Pieces beginning with an alphabetic character are treated as literal and exact matches.
 
-* Pieces beginning with `:` (and up to the next `/`, or the end of the string) are treated as url  parameters, with the value of the parameter in the url being stored under `this.props.params` with the piece as the key.
+* Pieces beginning with `:` (and up to the next `/`, or the end of the string) are treated as url parameters, with the value of the url parameter being stored under `this.props.params` with the piece as the key.
 
-If the parameter is `null`, the `route_children` element of the `route_branch` must exist and will be examined for matching.
+If the `route_path` is `null`, the `route_children` element of the `route_branch` must exist and will be examined for matching.
+
+If the url being matched against has query parameters, they will be stored in `this.props.query` as key-value pairs.
 
 Consider the following examples:
 
 ```javascript
-['login', MyElement]         // Matches 'example.com/login'
+// Matches 'example.com/login'
+['login', MyElement]
 
-['user/:user_id', MyElement] // Matches 'example.com/user/1994', with '1994' stored as this.props.params.user_id in the matched element.
+// Matches 'example.com/user/1994', with the following stored in the matched element:
+//   this.props.params.user_id = '1994'
+['user/:user_id', MyElement]
 
-[null, MyElement, children]  // Defers matching to the route_branches in the children array. If one of those children routes is a match, it will be wrapped in the MyElement ReactElement.
+// Matches 'example.com/photo/4314955/edit?mode=guest', with the following stored in the matched element:
+//   this.props.params.photo_id = '4314955'
+//   this.props.query.mode      = 'guest'
+['photo/:photo_id/edit', MyElement]
+
+// Defers matching to the route_branches in the children array. If one of those child routes is a match, it will be wrapped in MyElement.
+[null, MyElement, children]
 ```
 
 **2.** `route_element` **ReactElement** *required*
@@ -221,3 +232,31 @@ Aliases of [`history.push()` and `history.replace()`](https://github.com/ReactTr
 Use `push()` whenever you want the user to be able to use their browser's back button to return to the current route, e.g. when navigating to a new route upon a button click.
 
 Use `replace()` whenever you don't want the user to be able to use their browser's back button to return to the current route, e.g. when kicking the user out of a route they aren't allowed to view and onto one they are allowed to.
+
+These functions should be called on `this.props.router`, i.e.
+
+```javascript
+this.props.router.push('/settings');
+```
+```javascript
+this.props.router.replace('/login');
+```
+---
+
+### `<A/>`
+
+Wrapper for an `<a/>` tag with a valid `href` attribute, that uses `push()` to take the user to that `href`. Used for intra-app links in single page apps, where a regular `<a/>` tag is undesirable because it would cause the entire app to reload.
+
+To use, adjust the `import Rhaetia` statement to:
+
+```javascript
+import Rhaetia, {A} from 'Rhaetia';
+```
+
+Then place an `<A/>` in your React component wherever you want an intra-app link, and give it an `href` attribute;
+
+```javascript
+<A href='/photos'>{'Your Photos'}</A>
+```
+
+The only other attribute `<A/>` accepts is `className`.

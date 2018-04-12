@@ -38,8 +38,8 @@ export default class Rhaetia {
   setRoutes(route_tree, trunk = '', hierarchy = [], locked = null) {
     let route_array = [];
     for (let i=0; i<route_tree.length; i++) {
-      let route = route_tree[i];
-      let has_children = Array.isArray(route[2]);
+      const route = route_tree[i];
+      const has_children = Array.isArray(route[2]);
       let new_trunk = '';
       if (route[0] === null || route[0] === '') {
         new_trunk = trunk;
@@ -50,8 +50,8 @@ export default class Rhaetia {
       else {
         new_trunk = trunk + '/' + route[0];
       }
-      let new_hierarchy = [...hierarchy, route[1]];
-      let new_locked = (route[3] !== undefined) ? route[3] : locked;
+      const new_hierarchy = [...hierarchy, route[1]];
+      const new_locked = (route[3] !== undefined) ? route[3] : locked;
       if (has_children === false) {
         route_array.push([
           new_trunk,

@@ -35,17 +35,8 @@ export default class Rhaetia {
     return query;
   }
 
-  setRoutes(route_tree, trunk, hierarchy, locked) {
+  setRoutes(route_tree, trunk = '', hierarchy = [], locked = null) {
     let route_array = [];
-    if (trunk === undefined) {
-      trunk = '';
-    }
-    if (hierarchy === undefined) {
-      hierarchy = [];
-    }
-    if (locked === undefined) {
-      locked = null;
-    }
     for (let i=0; i<route_tree.length; i++) {
       let route = route_tree[i];
       let has_children = Array.isArray(route[2]);

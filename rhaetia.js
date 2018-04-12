@@ -36,6 +36,11 @@ export default class Rhaetia {
   }
 
   setRoutes(route_tree, trunk = '', hierarchy = [], locked = null) {
+    if (!Array.isArray(route_tree)) {
+      throw new TypeError('route_tree must be an array.');
+      return null;
+    }
+
     let route_array = [];
     for (let i=0; i<route_tree.length; i++) {
       const route = route_tree[i];

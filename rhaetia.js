@@ -14,6 +14,11 @@ export default class Rhaetia {
   }
 
   listen(listener) {
+    if (typeof listener !== 'function') {
+      throw new TypeError('onDidNavigate must be a function. Instead received: ' + String(listener));
+      return null;
+    }
+
     this.history.listen((location) => {
       this.path = this.getLocation();
       listener();
@@ -36,9 +41,44 @@ export default class Rhaetia {
   }
 
   setRoutes(route_tree, trunk = '', hierarchy = [], locked = null) {
+    if (!Array.isArray(route_tree)) {
+      throw new TypeError('route_tree must be an array. Instead received: ' + String(route_tree));
+      return null;
+    }
+
     let route_array = [];
     for (let i=0; i<route_tree.length; i++) {
       const route = route_tree[i];
+
+      if (!Array.isArray(route)) {
+        throw new TypeError('route_branch must be an array. Instead received: ' + String(route));
+        return null;
+      }
+      else if (route.length < 2 || route.length > 4) {
+        throw new TypeError('route_branch must have a length between 2 and 4.');
+        return null;
+      }
+      else if (route[0] !== null && typeof route[0] !== 'string') {
+        throw new TypeError('route_branch[0] must be either null or a string. Instead received: ' + String(route[0]));
+        return null;
+      }
+      else if (!React.Component.isPrototypeOf(route[1])) {
+        throw new TypeError('route_branch[1] must be a React component. Instead received: ' + String(route[1]));
+        return null;
+      }
+      else if (route.length >= 3 && !Array.isArray(route[2])) {
+        throw new TypeError('route_branch[2] must be an array. Instead received: ' + String(route[2]));
+        return null;
+      }
+      else if (route[0] === null && route.length === 2) {
+        throw new TypeError('route_branch[2] must be an array, if route_branch[0] is null.');
+        return null;
+      }
+      else if (route.length === 4 && typeof route[3] !== 'boolean') {
+        throw new TypeError('route_branch[3] must be a boolean. Instead received: ' + String(route[3]));
+        return null;
+      }
+
       const has_children = Array.isArray(route[2]);
       let new_trunk = '';
       if (route[0] === null || route[0] === '') {
@@ -66,11 +106,17 @@ export default class Rhaetia {
     return route_array;
   }
 
-  match(props, is_authenticated) {
-    let child = null;
-    if (typeof props !== 'object' || props === null) {
-      props = {};
+  match(props = {}, is_authenticated) {
+    if (typeof props !== 'object') {
+      throw new TypeError('props must be an object. Instead received: ' + String(props));
+      return null;
     }
+    else if (typeof is_authenticated !== 'boolean') {
+      throw new TypeError('is_authenticated must be a boolean. Instead received: ' + String(is_authenticated));
+      return null;
+    }
+
+    let child = null;
     const query = this.getQuery();
     for (let i=0; i<this.routes.length; i++) {
       const route = this.routes[i];

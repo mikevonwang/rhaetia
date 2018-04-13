@@ -14,6 +14,11 @@ export default class Rhaetia {
   }
 
   listen(listener) {
+    if (typeof listener !== 'function') {
+      throw new TypeError('onDidNavigate must be a function. Instead received: ' + String(listener));
+      return null;
+    }
+
     this.history.listen((location) => {
       this.path = this.getLocation();
       listener();
@@ -58,7 +63,7 @@ export default class Rhaetia {
         return null;
       }
       else if (!React.Component.isPrototypeOf(route[1])) {
-        throw new TypeError('route_branch[1] must be a React element. Instead received: ' + String(route[1]));
+        throw new TypeError('route_branch[1] must be a React component. Instead received: ' + String(route[1]));
         return null;
       }
       else if (route.length >= 3 && !Array.isArray(route[2])) {
@@ -101,11 +106,17 @@ export default class Rhaetia {
     return route_array;
   }
 
-  match(props, is_authenticated) {
-    let child = null;
-    if (typeof props !== 'object' || props === null) {
-      props = {};
+  match(props = {}, is_authenticated) {
+    if (typeof props !== 'object') {
+      throw new TypeError('props must be an object. Instead received: ' + String(props));
+      return null;
     }
+    else if (typeof is_authenticated !== 'boolean') {
+      throw new TypeError('is_authenticated must be a boolean. Instead received: ' + String(is_authenticated));
+      return null;
+    }
+
+    let child = null;
     const query = this.getQuery();
     for (let i=0; i<this.routes.length; i++) {
       const route = this.routes[i];

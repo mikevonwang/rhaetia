@@ -21,14 +21,14 @@ import Rhaetia from 'rhaetia';
 ```javascript
 const route_tree = [
   // These 2 routes are viewable to unauthenticated users only. They are both wrapped in a
-  // Front ReactElement.
+  // "Front" React Component.
   [null, Front, [
     ['login', Login],
     ['register', Register],
   ], false],
 
   // These 4 routes are viewable to authenticated users only. They are all wrapped in a
-  // Main ReactElement. The 3rd and 4th routes include url parameters.
+  // "Main" React Component. The 3rd and 4th routes include url parameters.
   [null, Main, [
     ['', Home],
     ['settings', Settings],
@@ -97,13 +97,21 @@ render() {
 
 ## Documentation
 
-### `new Rhaetia(route_tree)`
+### `new Rhaetia(root, route_tree)`
 
 Creates a new Rhaetia router. This should be called in the `constructor()` function of your top-level React component.
 
 #### Parameters
 
-##### `route_tree` **Array**
+##### `root` **React Component** *required*
+
+Your top-level React Component. Usually passed in as `this`:
+
+```javascript
+this.router = new Rhaetia(this, route_tree);
+```
+
+##### `route_tree` **Array** *required*
 
 An array detailing every route in the app.
 
@@ -167,7 +175,7 @@ Consider the following examples:
 [null, MyElement, children]
 ```
 
-**2.** `route_element` **ReactElement** *required*
+**2.** `route_element` **React Component** *required*
 
 The React element that matches a certain `route_path`. Multiple `route_branch` arrays can have the same `route_element` value.
 
@@ -209,7 +217,7 @@ An object of properties that each React element matched by the current url shoul
 
 Either:
 
-1. A `ReactElement` matching the current url.
+1. A `React Element` matching the current url.
 
 2. The number `1`, if the user is not authenticated and is accessing a route with `route_locked` set to `true`.
 

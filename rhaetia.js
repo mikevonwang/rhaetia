@@ -111,9 +111,18 @@ export default class Rhaetia {
       throw new TypeError('props must be an object. Instead received: ' + String(props));
       return null;
     }
-    else if (typeof is_authenticated !== 'boolean') {
-      throw new TypeError('is_authenticated must be a boolean. Instead received: ' + String(is_authenticated));
-      return null;
+    else {
+      const illegal_property = ['params', 'query', 'router'].find((property) => {
+        return (props[property] !== undefined);
+      });
+      if (illegal_property !== undefined) {
+        throw new TypeError('props cannot have the property: ' + illegal_property);
+        return null;
+      }
+      else if (typeof is_authenticated !== 'boolean') {
+        throw new TypeError('is_authenticated must be a boolean. Instead received: ' + String(is_authenticated));
+        return null;
+      }
     }
 
     let child = null;
@@ -151,6 +160,7 @@ export default class Rhaetia {
             let Node = hierarchy[j];
             props.params = params;
             props.query = query;
+            props.router = this;
             child = React.createElement(Node, props, child);
           }
         }

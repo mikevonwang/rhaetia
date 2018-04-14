@@ -29,6 +29,12 @@ export default class Rhaetia {
       this.path = this.getLocation();
       root.onDidNavigate();
     });
+
+    root.getChildContext = () => {
+      return {
+        router: this,
+      }
+    }
   }
 
   getLocation() {

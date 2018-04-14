@@ -8,7 +8,7 @@ Rhaetia is a lightweight router for React.
 
 ## Usage and Example
 
-After installation, there are 6 main steps to implementing Rhaetia:
+After installation, there are 5 main steps to implementing Rhaetia:
 
 **1.** Import Rhaetia into your app at the beginning of your top-level React component.
 
@@ -20,13 +20,15 @@ import Rhaetia from 'rhaetia';
 
 ```javascript
 const route_tree = [
-  // These 2 routes are viewable to unauthenticated users only. They are both wrapped in a Front ReactElement.
+  // These 2 routes are viewable to unauthenticated users only. They are both wrapped in a
+  // Front ReactElement.
   [null, Front, [
     ['login', Login],
     ['register', Register],
   ], false],
 
-  // These 4 routes are viewable to authenticated users only. They are all wrapped in a Main ReactElement. The 3rd and 4th routes include url parameters.
+  // These 4 routes are viewable to authenticated users only. They are all wrapped in a
+  // Main ReactElement. The 3rd and 4th routes include url parameters.
   [null, Main, [
     ['', Home],
     ['settings', Settings],
@@ -47,7 +49,9 @@ class App extends React.Component {
     super(props);
     this.state = {};
 
-    this.router = new Rhaetia(route_tree); // Normally, the route_tree array is not a named variable, but instead is passed directly into this function.
+    // Normally, the route_tree array is not a named variable, but instead is passed directly
+    // into this constructor.
+    this.router = new Rhaetia(this, route_tree);
   }
 }
 ```
@@ -59,16 +63,16 @@ onDidNavigate() {
   // This object will be available to every matched ReactElement as this.props
   const element_props = {
     data: this.state,
-    router: this.router,
     key: 'MyElement',
   };
 
-  // This Boolean is used by Rhaetia to decide whether a user should be able to view a route or not
+  // This boolean is used by Rhaetia to decide whether a user should be able to view a route or not
   const is_logged_in = this.state.is_logged_in;
 
   let child = this.router.match(element_props, is_logged_in);
 
-  // If the user is allowed to view the matched route, then setState() is called. Otherwise, the app kicks the user out to a route they are allowed to see.
+  // If the user is allowed to view the matched route, then setState() is called. Otherwise, the app
+  // kicks the user out to a route they are allowed to see.
   if (child === 1) {
     this.router.replace('/login');
   }
@@ -83,15 +87,7 @@ onDidNavigate() {
 }
 ```
 
-**5.** Call `listen()` in the `componentWillMount()` of your top-level React component, and pass it your `onDidNavigate`.
-
-```javascript
-componentWillMount() {
-  this.router.listen(this.onDidNavigate.bind(this));
-}
-```
-
-**6.** Return the result of step 3 in the `render()` of your top-level React component.
+**5.** Return the result of step 4 in the `render()` of your top-level React component.
 
 ```javascript
 render() {
@@ -117,8 +113,19 @@ Every item in the array must be a `route_branch` array. These arrays must be ord
 const route_tree = [
   ['settings', Settings],
   ['post/new', NewPost],
-  ['post/:post_id', Post], // This route_branch has a url parameter as its second route_path piece. Its partner above it has an identical first route_path piece, but a literal as its second route_path piece. This route must therefore appear after its partner, otherwise a url like 'example.com/post/new' would match this route instead of its partner.
-  [':username', Profile], // This route_branch has a url parameter as its first route_path piece, and is therefore the most general. It must be at the bottom, otherwise a url like 'example.com/settings' would match this route instead of the first one.
+
+  // This route_branch has a url parameter as its second route_path piece.
+  // Its partner above it has an identical first route_path piece, but a literal as its second
+  // route_path piece.
+  // This route must therefore appear after its partner, otherwise a url like 'example.com/post/new'
+  // would match this route instead of its partner.
+  ['post/:post_id', Post],
+
+  // This route_branch has a url parameter as its first route_path piece, and is therefore the most
+  // general.
+  // It must be at the bottom, otherwise a url like 'example.com/settings' would match this
+  // route instead of the first one.
+  [':username', Profile],
 ];
 ```
 
@@ -155,7 +162,8 @@ Consider the following examples:
 //   this.props.query.mode      = 'guest'
 ['photo/:photo_id/edit', MyElement]
 
-// Defers matching to the route_branches in the children array. If one of those child routes is a match, it will be wrapped in MyElement.
+// Defers matching to the route_branches in the children array.
+// If one of those child routes is a match, it will be wrapped in MyElement.
 [null, MyElement, children]
 ```
 
@@ -180,22 +188,6 @@ Signifies whether or not the authentication status of a user affects their abili
 #### Return value
 
 A Rhaetia router.
-
----
-
-### `listen(onDidNavigate)`
-
-Allows Rhaetia to listen to browser navigation events. This should be called in the `componentWillMount()` function of your top-level React component.
-
-#### Parameters
-
-##### `onDidNavigate` **Function**
-
-A function which calls `match()` and responds to the result, whether it be navigating away from a forbidden route or setting the matched React elements to the component's state. This function takes no parameters.
-
-#### Return value
-
-`undefined`
 
 ---
 

@@ -4,24 +4,30 @@ import createHistory from 'history/createBrowserHistory';
 
 export default class Rhaetia {
 
-  constructor(route_tree) {
+  constructor(root, route_tree) {
+    if (!Object.getPrototypeOf(root).isReactComponent) {
+      throw new TypeError('root must be a React class component. Instead received: ' + String(root));
+      return null;
+    }
+    else if (typeof root.onDidNavigate !== 'function') {
+      throw new TypeError('onDidNavigate must be a function. Instead received: ' + String(root.onDidNavigate));
+      return null;
+    }
+    else if (!Array.isArray(route_tree)) {
+      throw new TypeError('route_tree must be an array. Instead received: ' + String(route_tree));
+      return null;
+    }
+
     this.history = createHistory();
     this.routes = this.setRoutes(route_tree);
     this.path = this.getLocation();
     this.push = this.history.push;
     this.replace = this.history.replace;
     this.location = this.history.location;
-  }
-
-  listen(listener) {
-    if (typeof listener !== 'function') {
-      throw new TypeError('onDidNavigate must be a function. Instead received: ' + String(listener));
-      return null;
-    }
 
     this.history.listen((location) => {
       this.path = this.getLocation();
-      listener();
+      root.onDidNavigate();
     });
   }
 
@@ -41,11 +47,6 @@ export default class Rhaetia {
   }
 
   setRoutes(route_tree, trunk = '', hierarchy = [], locked = null) {
-    if (!Array.isArray(route_tree)) {
-      throw new TypeError('route_tree must be an array. Instead received: ' + String(route_tree));
-      return null;
-    }
-
     let route_array = [];
     for (let i=0; i<route_tree.length; i++) {
       const route = route_tree[i];

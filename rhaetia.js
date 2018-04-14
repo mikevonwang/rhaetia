@@ -160,8 +160,7 @@ export default class Rhaetia {
           props.query = this.getQuery();
           props.router = this;
           for (let j=hierarchy.length-1; j>=0; j--) {
-            let Node = hierarchy[j];
-            child = React.createElement(Node, props, child);
+            child = React.createElement(hierarchy[j], props, child);
           }
         }
         break;

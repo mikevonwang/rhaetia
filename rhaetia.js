@@ -113,17 +113,17 @@ export default class Rhaetia {
     return route_array;
   }
 
-  match(props = {}, is_authenticated) {
-    if (typeof props !== 'object') {
-      throw new TypeError('props must be an object. Instead received: ' + String(props));
+  match(child_props = {}, is_authenticated) {
+    if (typeof child_props !== 'object') {
+      throw new TypeError('child_props must be an object. Instead received: ' + String(child_props));
       return null;
     }
     else {
       const illegal_property = ['params', 'query', 'router'].find((property) => {
-        return (props[property] !== undefined);
+        return (child_props[property] !== undefined);
       });
       if (illegal_property !== undefined) {
-        throw new TypeError('props cannot have the property: ' + illegal_property);
+        throw new TypeError('child_props cannot have the property: ' + illegal_property);
         return null;
       }
       else if (typeof is_authenticated !== 'boolean') {
@@ -162,11 +162,11 @@ export default class Rhaetia {
           child = -1;
         }
         else {
-          props.params = params;
-          props.query = this.getQuery();
-          props.router = this;
+          child_props.params = params;
+          child_props.query = this.getQuery();
+          child_props.router = this;
           for (let j=hierarchy.length-1; j>=0; j--) {
-            child = React.createElement(hierarchy[j], props, child);
+            child = React.createElement(hierarchy[j], child_props, child);
           }
         }
         break;

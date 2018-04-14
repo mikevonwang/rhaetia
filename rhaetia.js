@@ -127,7 +127,6 @@ export default class Rhaetia {
     }
 
     let child = null;
-    const query = this.getQuery();
     for (let i=0; i<this.routes.length; i++) {
       const route = this.routes[i];
       const route_path = route[0].split('/');
@@ -158,7 +157,7 @@ export default class Rhaetia {
         }
         else {
           props.params = params;
-          props.query = query;
+          props.query = this.getQuery();
           props.router = this;
           for (let j=hierarchy.length-1; j>=0; j--) {
             let Node = hierarchy[j];

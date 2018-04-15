@@ -23,7 +23,6 @@ export default class Rhaetia {
 
     this.path = this.getPath();
     this.query = this.getQuery();
-    this.params = {};
 
     this.push = this.history.push;
     this.replace = this.history.replace;
@@ -122,19 +121,21 @@ export default class Rhaetia {
       throw new TypeError('child_props must be an object. Instead received: ' + String(child_props));
       return null;
     }
-    else {
-      const illegal_property = ['params', 'query', 'router'].find((property) => {
-        return (child_props[property] !== undefined);
-      });
-      if (illegal_property !== undefined) {
-        throw new TypeError('child_props cannot have the property: ' + illegal_property);
-        return null;
-      }
-      else if (typeof is_authenticated !== 'boolean') {
-        throw new TypeError('is_authenticated must be a boolean. Instead received: ' + String(is_authenticated));
-        return null;
-      }
+    else if (child_props.router !== undefined) {
+      throw new TypeError('child_props cannot have the property: ' + 'router');
+      return null;
     }
+    else if (typeof is_authenticated !== 'boolean') {
+      throw new TypeError('is_authenticated must be a boolean. Instead received: ' + String(is_authenticated));
+      return null;
+    }
+
+    child_props.router = {
+      push: this.push,
+      replace: this.replace,
+      path: this.path,
+      query: this.query,
+    };
 
     let child = null;
     for (let i=0; i<this.routes.length; i++) {
@@ -166,8 +167,7 @@ export default class Rhaetia {
           child = -1;
         }
         else {
-          this.params = params;
-          child_props.router = this;
+          child_props.router.params = params;
           for (let j=hierarchy.length-1; j>=0; j--) {
             child = React.createElement(hierarchy[j], child_props, child);
           }

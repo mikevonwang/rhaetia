@@ -20,13 +20,17 @@ export default class Rhaetia {
 
     this.history = createHistory();
     this.routes = this.setRoutes(route_tree);
-    this.path = this.getLocation();
+
+    this.path = this.getPath();
+    this.query = this.getQuery();
+    this.params = {};
+
     this.push = this.history.push;
     this.replace = this.history.replace;
-    this.location = this.history.location;
 
-    this.history.listen((location) => {
-      this.path = this.getLocation();
+    this.history.listen(() => {
+      this.path = this.getPath();
+      this.query = this.getQuery();
       root.onDidNavigate();
     });
 
@@ -37,7 +41,7 @@ export default class Rhaetia {
     }
   }
 
-  getLocation() {
+  getPath() {
     return window.location.pathname.substring(1).split('/');
   }
 
@@ -162,8 +166,7 @@ export default class Rhaetia {
           child = -1;
         }
         else {
-          child_props.params = params;
-          child_props.query = this.getQuery();
+          this.params = params;
           child_props.router = this;
           for (let j=hierarchy.length-1; j>=0; j--) {
             child = React.createElement(hierarchy[j], child_props, child);

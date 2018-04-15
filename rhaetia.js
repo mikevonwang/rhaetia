@@ -199,7 +199,10 @@ export class A extends React.Component {
     }, this.props.children);
   }
 };
-
 A.contextTypes = {
   router: PropTypes.instanceOf(Rhaetia),
+};
+
+export const renderChild = (child, props) => {
+  return (child && React.cloneElement(child, Object.assign({}, props)));
 };

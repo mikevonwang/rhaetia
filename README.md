@@ -8,7 +8,7 @@ Rhaetia is a lightweight router for React.
 
 ## Usage and Example
 
-After installation, there are 5 main steps to implementing Rhaetia:
+After installation, there are 6 main steps to implementing Rhaetia:
 
 **1.** Import Rhaetia into your app at the beginning of your top-level React component.
 
@@ -92,6 +92,38 @@ onDidNavigate() {
 ```javascript
 render() {
   return (this.state.child);
+}
+```
+
+**6.** For any React components in your `route_tree` with child components, use `React.cloneElement()` to render those children:
+
+```javascript
+class Main extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    return (
+      <main>
+        {this.props.children && React.cloneElement(this.props.children, Object.assign({}, {
+          message: 'Hello World!',
+        }))}
+      </main>
+    );
+  }
+}
+
+class Login extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    return (
+      <section>
+        <h1>{this.props.message}</h1>
+      </section>
+    );
+  }
 }
 ```
 

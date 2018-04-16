@@ -200,8 +200,18 @@ export class A extends React.Component {
   }
 
 };
+A.propTypes = {
+  href: PropTypes.string.isRequired,
+  className: PropTypes.string,
+  replace: PropTypes.bool,
+}
 
 export const renderChild = (child, props = {}) => {
+  if (!React.isValidElement(child) && child !== null) {
+    throw new TypeError('child must be a React element or null. Instead received: ' + String(child));
+    return null;
+  }
+
   return (child && React.cloneElement(child, Object.assign({}, props)));
 };
 

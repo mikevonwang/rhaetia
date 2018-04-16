@@ -2,6 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import createHistory from 'history/createBrowserHistory';
 
+const rhaetia_history = createHistory();
+
 export default class Rhaetia {
 
   constructor(root, route_tree) {
@@ -18,26 +20,19 @@ export default class Rhaetia {
       return null;
     }
 
-    this.history = createHistory();
     this.routes = this.setRoutes(route_tree);
 
     this.path = this.getPath();
     this.query = this.getQuery();
 
-    this.push = this.history.push;
-    this.replace = this.history.replace;
+    this.push = rhaetia_history.push;
+    this.replace = rhaetia_history.replace;
 
-    this.history.listen(() => {
+    rhaetia_history.listen(() => {
       this.path = this.getPath();
       this.query = this.getQuery();
       root.onDidNavigate();
     });
-
-    root.getChildContext = () => {
-      return {
-        router: this,
-      }
-    }
   }
 
   getPath() {
@@ -188,7 +183,7 @@ export class A extends React.Component {
 
   goto(e) {
     e.preventDefault();
-    this.context.router.push(this.props.href);
+    rhaetia_history.push(this.props.href);
   }
 
   render() {
@@ -198,9 +193,7 @@ export class A extends React.Component {
       onClick: (e) => this.goto(e),
     }, this.props.children);
   }
-};
-A.contextTypes = {
-  router: PropTypes.instanceOf(Rhaetia),
+
 };
 
 export const renderChild = (child, props) => {

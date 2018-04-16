@@ -95,7 +95,7 @@ render() {
 }
 ```
 
-**6.** For any React components in your `route_tree` with child components, use `React.cloneElement()` to render those children:
+**6.** For any React components in your `route_tree` with child components, use `renderChild()` to render those children:
 
 ```javascript
 class Main extends React.Component {
@@ -105,9 +105,9 @@ class Main extends React.Component {
   render() {
     return (
       <main>
-        {this.props.children && React.cloneElement(this.props.children, Object.assign({}, {
+        {renderChild(this.props.children, {
           message: 'Hello World!',
-        }))}
+        })}
       </main>
     );
   }
@@ -275,11 +275,47 @@ this.props.router.replace('/login');
 ```
 ---
 
+### `renderChild(child, props)`
+
+Used in React components that wrap other React components according to your `route_tree`.
+
+To use, adjust your `import Rhaetia` statement to:
+
+```javascript
+import Rhaetia, {renderChild} from 'Rhaetia';
+```
+
+Then place one `renderChild()` in your React component wherever you want its child to appear;
+
+```javascript
+<main>
+  {renderChild(this.props.children, {
+    message: 'Hello World!',
+  })}
+</main>
+```
+
+#### Parameters
+
+##### `child` **React component** *required*
+
+The child of this component. Usually passed in as `this.props.children`.
+
+##### `props` **Object** *optional*
+
+Any additional props that you wish to pass into the child of this component.
+
+#### Return value
+
+A React element presenting the child of this component.
+
+---
+
 ### `<A/>`
 
-Wrapper for an `<a/>` tag with a valid `href` attribute, that uses `push()` to take the user to that `href`. Used for intra-app links in single page apps, where a regular `<a/>` tag is undesirable because it would cause the entire app to reload.
+Wrapper for an `<a/>` tag with a valid `href` attribute, that uses `push()` (by default) to take the user to that `href`. Used for intra-app links in single page apps, where a regular `<a/>` tag is undesirable because it would cause the entire app to reload.
 
-To use, adjust the `import Rhaetia` statement to:
+To use, adjust your `import Rhaetia` statement to:
 
 ```javascript
 import Rhaetia, {A} from 'Rhaetia';
@@ -291,4 +327,16 @@ Then place an `<A/>` in your React component wherever you want an intra-app link
 <A href='/photos'>{'Your Photos'}</A>
 ```
 
-The only other attribute `<A/>` accepts is `className`.
+#### Attributes
+
+##### `href` **String** *required*
+
+Used as the `href` attribute for the rendered `<a/>` element. Must be a relative URL; links with absolute URLs should directly use a regular `<a/>` element.
+
+##### `className` **String** *optional*
+
+Used as the `class` attribute for the rendered `<a/>` element.
+
+##### `replace` **Boolean** *optional*
+
+If `true` (using `===`), then this element will use `replace()` instead of `push()`.

@@ -201,6 +201,6 @@ export class A extends React.Component {
 
 };
 
-export const renderChild = (child, props) => {
+export const renderChild = (child, props = {}) => {
   return (child && React.cloneElement(child, Object.assign({}, props)));
 };

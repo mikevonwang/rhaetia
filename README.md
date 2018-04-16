@@ -10,10 +10,20 @@ Rhaetia is a lightweight router for React.
 
 After installation, there are 6 main steps to implementing Rhaetia:
 
-**1.** Import Rhaetia into your app at the beginning of your top-level React component.
+**1.** Import Rhaetia into your app at the top of each component you want to use it with:
 
 ```javascript
 import Rhaetia from 'rhaetia';
+```
+
+If you use Webpack, you could instead include Rhaetia in Webpack's `providePlugin()`, and avoid having to write the above `import` statement over and over:
+
+```javascript
+plugins: [
+  new webpack.ProvidePlugin({
+    Rhaetia: 'rhaetia',
+  }),
+],
 ```
 
 **2.** Create a `route_tree` array (see below for specifications).
@@ -41,7 +51,7 @@ const route_tree = [
 ];
 ```
 
-**3.** Create a `new Rhaetia()` in the `constructor()` of your top-level React component. Pass your `route_tree` to it, and assign the result to `this.router`.
+**3.** Create a `new Rhaetia.router()` in the `constructor()` of your top-level React component. Pass your `route_tree` to it, and assign the result to `this.router`.
 
 ```javascript
 class App extends React.Component {
@@ -51,7 +61,7 @@ class App extends React.Component {
 
     // Normally, the route_tree array is not a named variable, but instead is passed directly
     // into this constructor.
-    this.router = new Rhaetia(this, route_tree);
+    this.router = new Rhaetia.router(this, route_tree);
   }
 }
 ```
@@ -60,7 +70,7 @@ class App extends React.Component {
 
 ```javascript
 onDidNavigate() {
-  // This object will be available to every matched ReactElement as this.props
+  // This object will be available to every matched React element as this.props
   const element_props = {
     data: this.state,
     key: 'MyElement',
@@ -95,7 +105,7 @@ render() {
 }
 ```
 
-**6.** For any React components in your `route_tree` with child components, use `renderChild()` to render those children:
+**6.** For any React components in your `route_tree` with child components, use `Rhaetia.renderChild()` to render those children:
 
 ```javascript
 class Main extends React.Component {
@@ -105,7 +115,7 @@ class Main extends React.Component {
   render() {
     return (
       <main>
-        {renderChild(this.props.children, {
+        {Rhaetia.renderChild(this.props.children, {
           message: 'Hello World!',
         })}
       </main>
@@ -129,7 +139,7 @@ class Login extends React.Component {
 
 ## Documentation
 
-### `new Rhaetia(root, route_tree)`
+### `new Rhaetia.router(root, route_tree)`
 
 Creates a new Rhaetia router. This should be called in the `constructor()` function of your top-level React component.
 
@@ -140,7 +150,7 @@ Creates a new Rhaetia router. This should be called in the `constructor()` funct
 Your top-level React Component. Usually passed in as `this`:
 
 ```javascript
-this.router = new Rhaetia(this, route_tree);
+this.router = new Rhaetia.router(this, route_tree);
 ```
 
 ##### `route_tree` **Array** *required*
@@ -275,21 +285,15 @@ this.props.router.replace('/login');
 ```
 ---
 
-### `renderChild(child, props)`
+### `Rhaetia.renderChild(child, props)`
 
 Used in React components that wrap other React components according to your `route_tree`.
 
-To use, adjust your `import Rhaetia` statement to:
-
-```javascript
-import Rhaetia, {renderChild} from 'Rhaetia';
-```
-
-Then place one `renderChild()` in your React component wherever you want its child to appear;
+To use, place one `Rhaetia.renderChild()` in your React component wherever you want its child to appear;
 
 ```javascript
 <main>
-  {renderChild(this.props.children, {
+  {Rhaetia.renderChild(this.props.children, {
     message: 'Hello World!',
   })}
 </main>
@@ -315,13 +319,30 @@ A React element presenting the child of this component.
 
 Wrapper for an `<a/>` tag with a valid `href` attribute, that uses `push()` (by default) to take the user to that `href`. Used for intra-app links in single page apps, where a regular `<a/>` tag is undesirable because it would cause the entire app to reload.
 
-To use, adjust your `import Rhaetia` statement to:
+To use, place an `<Rhaetia.A/>` in your React component wherever you want an intra-app link, and give it an `href` attribute;
+
+```javascript
+<Rhaetia.A href='/photos'>{'Your Photos'}</Rhaetia.A>
+```
+
+The shorthand `<A/>` also exists. To use, either adjust your `import Rhaetia` statement to include `A`:
 
 ```javascript
 import Rhaetia, {A} from 'Rhaetia';
 ```
 
-Then place an `<A/>` in your React component wherever you want an intra-app link, and give it an `href` attribute;
+Or, if you use Webpack, adjust your `providePlugin()` to include `A`:
+
+```javascript
+plugins: [
+  new webpack.ProvidePlugin({
+    Rhaetia: 'rhaetia',
+    A: ['rhaetia', 'A'],
+  }),
+],
+```
+
+This cleans up the above syntax a little:
 
 ```javascript
 <A href='/photos'>{'Your Photos'}</A>

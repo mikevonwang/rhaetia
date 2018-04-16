@@ -4,7 +4,7 @@ import createHistory from 'history/createBrowserHistory';
 
 const rhaetia_history = createHistory();
 
-export default class Rhaetia {
+export class router {
 
   constructor(root, route_tree) {
     if (!Object.getPrototypeOf(root).isReactComponent) {
@@ -204,3 +204,13 @@ export class A extends React.Component {
 export const renderChild = (child, props = {}) => {
   return (child && React.cloneElement(child, Object.assign({}, props)));
 };
+
+const Rhaetia = {
+  router,
+  A,
+  renderChild,
+};
+
+export default Rhaetia;
+
+module.exports = Rhaetia;

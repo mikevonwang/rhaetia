@@ -2,25 +2,40 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import createHistory from 'history/createBrowserHistory';
 
-export default class Rhaetia {
+const rhaetia_history = createHistory();
 
-  constructor(route_tree) {
-    this.history = createHistory();
+export class router {
+
+  constructor(root, route_tree) {
+    if (!Object.getPrototypeOf(root).isReactComponent) {
+      throw new TypeError('root must be a React class component. Instead received: ' + String(root));
+      return null;
+    }
+    else if (typeof root.onDidNavigate !== 'function') {
+      throw new TypeError('onDidNavigate must be a function. Instead received: ' + String(root.onDidNavigate));
+      return null;
+    }
+    else if (!Array.isArray(route_tree)) {
+      throw new TypeError('route_tree must be an array. Instead received: ' + String(route_tree));
+      return null;
+    }
+
     this.routes = this.setRoutes(route_tree);
-    this.path = this.getLocation();
-    this.push = this.history.push;
-    this.replace = this.history.replace;
-    this.location = this.history.location;
-  }
 
-  listen(listener) {
-    this.history.listen((location) => {
-      this.path = this.getLocation();
-      listener();
+    this.path = this.getPath();
+    this.query = this.getQuery();
+
+    this.push = rhaetia_history.push;
+    this.replace = rhaetia_history.replace;
+
+    rhaetia_history.listen(() => {
+      this.path = this.getPath();
+      this.query = this.getQuery();
+      root.onDidNavigate();
     });
   }
 
-  getLocation() {
+  getPath() {
     return window.location.pathname.substring(1).split('/');
   }
 
@@ -35,20 +50,41 @@ export default class Rhaetia {
     return query;
   }
 
-  setRoutes(route_tree, trunk, hierarchy, locked) {
+  setRoutes(route_tree, trunk = '', hierarchy = [], locked = null) {
     let route_array = [];
-    if (trunk === undefined) {
-      trunk = '';
-    }
-    if (hierarchy === undefined) {
-      hierarchy = [];
-    }
-    if (locked === undefined) {
-      locked = null;
-    }
     for (let i=0; i<route_tree.length; i++) {
-      let route = route_tree[i];
-      let has_children = Array.isArray(route[2]);
+      const route = route_tree[i];
+
+      if (!Array.isArray(route)) {
+        throw new TypeError('route_branch must be an array. Instead received: ' + String(route));
+        return null;
+      }
+      else if (route.length < 2 || route.length > 4) {
+        throw new TypeError('route_branch must have a length between 2 and 4.');
+        return null;
+      }
+      else if (route[0] !== null && typeof route[0] !== 'string') {
+        throw new TypeError('route_branch[0] must be either null or a string. Instead received: ' + String(route[0]));
+        return null;
+      }
+      else if (!React.Component.isPrototypeOf(route[1])) {
+        throw new TypeError('route_branch[1] must be a React component. Instead received: ' + String(route[1]));
+        return null;
+      }
+      else if (route.length >= 3 && !(Array.isArray(route[2]) || route[2] === null)) {
+        throw new TypeError('route_branch[2] must be either null or an array. Instead received: ' + String(route[2]));
+        return null;
+      }
+      else if (route[0] === null && route.length === 2) {
+        throw new TypeError('route_branch[2] must be an array, if route_branch[0] is null.');
+        return null;
+      }
+      else if (route.length === 4 && typeof route[3] !== 'boolean') {
+        throw new TypeError('route_branch[3] must be a boolean. Instead received: ' + String(route[3]));
+        return null;
+      }
+
+      const has_children = Array.isArray(route[2]);
       let new_trunk = '';
       if (route[0] === null || route[0] === '') {
         new_trunk = trunk;
@@ -59,8 +95,8 @@ export default class Rhaetia {
       else {
         new_trunk = trunk + '/' + route[0];
       }
-      let new_hierarchy = [...hierarchy, route[1]];
-      let new_locked = (route[3] !== undefined) ? route[3] : locked;
+      const new_hierarchy = [...hierarchy, route[1]];
+      const new_locked = (route[3] !== undefined) ? route[3] : locked;
       if (has_children === false) {
         route_array.push([
           new_trunk,
@@ -75,12 +111,28 @@ export default class Rhaetia {
     return route_array;
   }
 
-  match(props, is_authenticated) {
-    let child = null;
-    if (typeof props !== 'object' || props === null) {
-      props = {};
+  match(child_props = {}, is_authenticated) {
+    if (typeof child_props !== 'object') {
+      throw new TypeError('child_props must be an object. Instead received: ' + String(child_props));
+      return null;
     }
-    const query = this.getQuery();
+    else if (child_props.router !== undefined) {
+      throw new TypeError('child_props cannot have the property: ' + 'router');
+      return null;
+    }
+    else if (typeof is_authenticated !== 'boolean') {
+      throw new TypeError('is_authenticated must be a boolean. Instead received: ' + String(is_authenticated));
+      return null;
+    }
+
+    child_props.router = {
+      push: this.push,
+      replace: this.replace,
+      path: this.path,
+      query: this.query,
+    };
+
+    let child = null;
     for (let i=0; i<this.routes.length; i++) {
       const route = this.routes[i];
       const route_path = route[0].split('/');
@@ -110,11 +162,9 @@ export default class Rhaetia {
           child = -1;
         }
         else {
+          child_props.router.params = params;
           for (let j=hierarchy.length-1; j>=0; j--) {
-            let Node = hierarchy[j];
-            props.params = params;
-            props.query = query;
-            child = React.createElement(Node, props, child);
+            child = React.createElement(hierarchy[j], child_props, child);
           }
         }
         break;
@@ -133,7 +183,12 @@ export class A extends React.Component {
 
   goto(e) {
     e.preventDefault();
-    this.context.router.push(this.props.href);
+    if (this.props.replace === true) {
+      rhaetia_history.replace(this.props.href);
+    }
+    else {
+      rhaetia_history.push(this.props.href);
+    }
   }
 
   render() {
@@ -143,8 +198,29 @@ export class A extends React.Component {
       onClick: (e) => this.goto(e),
     }, this.props.children);
   }
+
+};
+A.propTypes = {
+  href: PropTypes.string.isRequired,
+  className: PropTypes.string,
+  replace: PropTypes.bool,
+}
+
+export const renderChild = (child, props = {}) => {
+  if (!React.isValidElement(child) && child !== null) {
+    throw new TypeError('child must be a React element or null. Instead received: ' + String(child));
+    return null;
+  }
+
+  return (child && React.cloneElement(child, Object.assign({}, props)));
 };
 
-A.contextTypes = {
-  router: PropTypes.instanceOf(Rhaetia),
+const Rhaetia = {
+  router,
+  A,
+  renderChild,
 };
+
+export default Rhaetia;
+
+module.exports = Rhaetia;

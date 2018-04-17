@@ -71,8 +71,8 @@ export class router {
         throw new TypeError('route_branch[1] must be a React component. Instead received: ' + String(route[1]));
         return null;
       }
-      else if (route.length >= 3 && !Array.isArray(route[2])) {
-        throw new TypeError('route_branch[2] must be an array. Instead received: ' + String(route[2]));
+      else if (route.length >= 3 && !(Array.isArray(route[2]) || route[2] === null)) {
+        throw new TypeError('route_branch[2] must be either null or an array. Instead received: ' + String(route[2]));
         return null;
       }
       else if (route[0] === null && route.length === 2) {

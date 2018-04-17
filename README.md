@@ -26,32 +26,7 @@ plugins: [
 ],
 ```
 
-**2.** Create a `route_tree` array (see below for specifications).
-
-```javascript
-const route_tree = [
-  // These 2 routes are viewable to unauthenticated users only. They are both wrapped in a
-  // "Front" React Component.
-  [null, Front, [
-    ['login', Login],
-    ['register', Register],
-  ], false],
-
-  // These 4 routes are viewable to authenticated users only. They are all wrapped in a
-  // "Main" React Component. The 3rd and 4th routes include url parameters.
-  [null, Main, [
-    ['', Home],
-    ['settings', Settings],
-    ['post/:post_id', Post],
-    [':username', Profile],
-  ], true],
-
-  // This route is viewable to all users.
-  ['terms', TermsConditions],
-];
-```
-
-**3.** Create a `new Rhaetia.router()` in the `constructor()` of your top-level React component. Pass your `route_tree` to it, and assign the result to `this.router`.
+**2.** Create a `new Rhaetia.router()` in the `constructor()` of your top-level React component, and assign the result to `this.router`. The first argument is normally just `this`. The second argument is a `route_tree` array, and defines your app's routes.
 
 ```javascript
 class App extends React.Component {
@@ -59,14 +34,31 @@ class App extends React.Component {
     super(props);
     this.state = {};
 
-    // Normally, the route_tree array is not a named variable, but instead is passed directly
-    // into this constructor.
-    this.router = new Rhaetia.router(this, route_tree);
+    this.router = new Rhaetia.router(this, [
+      // These 2 routes are viewable to unauthenticated users only. They are both wrapped in a
+      // "Front" React Component.
+      [null, Front, [
+        ['login', Login],
+        ['register', Register],
+      ], false],
+
+      // These 4 routes are viewable to authenticated users only. They are all wrapped in a
+      // "Main" React Component. The 3rd and 4th routes include url parameters.
+      [null, Main, [
+        ['', Home],
+        ['settings', Settings],
+        ['post/:post_id', Post],
+        [':username', Profile],
+      ], true],
+
+      // This route is viewable to all users.
+      ['terms', TermsConditions],
+    ]);
   }
 }
 ```
 
-**4.** Create a `onDidNavigate()` function in your top-level React component, wherein `match()` is called, and the result is passed to `setState()`.
+**3.** Create a `onDidNavigate()` function in your top-level React component, wherein `match()` is called, and the result is passed to `setState()`.
 
 ```javascript
 onDidNavigate() {
@@ -97,7 +89,7 @@ onDidNavigate() {
 }
 ```
 
-**5.** Return the result of step 4 in the `render()` of your top-level React component.
+**4.** Return the result of step 3 in the `render()` of your top-level React component.
 
 ```javascript
 render() {
@@ -105,7 +97,7 @@ render() {
 }
 ```
 
-**6.** For any React components in your `route_tree` with child components, use `Rhaetia.renderChild()` to render those children:
+**5.** For any React components in your `route_tree` with child components, use `Rhaetia.renderChild()` to render those children:
 
 ```javascript
 class Main extends React.Component {
@@ -134,6 +126,14 @@ class Login extends React.Component {
       </section>
     );
   }
+}
+```
+
+**6.** To create intra-app links that don't refresh your entire app, use `React.A`. With some adjustments, you could also use the shorthand `A`:
+
+```javascript
+render() {
+  return <A href='/photos'>{'Your Photos'}</A>
 }
 ```
 

@@ -151,7 +151,7 @@ export class router {
       else {
         for (let j=0; j<route_path.length; j++) {
           if (route_path[j][0] === ':') {
-            params[route_path[j].substring(1)] = this.path[j];
+            params[route_path[j].substring(1)] = (this.path[j] !== '') ? this.path[j] : null;
           }
           else if (route_path[j] !== this.path[j]) {
             is_match = false;

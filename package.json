@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Mike Wang <mikevonwang@kaeradigital.com",
-  "repository": "mikevonwang/rhaetia",
+  "repository": "https://gitlab.com/mikevonwang/rhaetia",
   "license": "MIT",
   "dependencies": {
     "history": "^4.7.2"

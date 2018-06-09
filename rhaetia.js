@@ -36,7 +36,11 @@ export class router {
   }
 
   getPath() {
-    return window.location.pathname.substring(1).split('/');
+    let path = window.location.pathname.substring(1).split('/');
+    if (path.length > 2 && path[path.length-1] === '') {
+      path.pop();
+    }
+    return path;
   }
 
   getQuery() {

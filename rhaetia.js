@@ -36,7 +36,11 @@ export class router {
   }
 
   getPath() {
-    return window.location.pathname.substring(1).split('/');
+    let path = window.location.pathname.substring(1).split('/');
+    if (path.length > 2 && path[path.length-1] === '') {
+      path.pop();
+    }
+    return path;
   }
 
   getQuery() {
@@ -147,7 +151,7 @@ export class router {
       else {
         for (let j=0; j<route_path.length; j++) {
           if (route_path[j][0] === ':') {
-            params[route_path[j].substring(1)] = this.path[j];
+            params[route_path[j].substring(1)] = (this.path[j] !== '') ? this.path[j] : null;
           }
           else if (route_path[j] !== this.path[j]) {
             is_match = false;

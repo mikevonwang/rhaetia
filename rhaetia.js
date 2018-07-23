@@ -37,7 +37,7 @@ export class router {
 
   getPath() {
     let path = window.location.pathname.substring(1).split('/');
-    if (path.length > 2 && path[path.length-1] === '') {
+    if (path.length > 1 && path[path.length-1] === '') {
       path.pop();
     }
     return path;
@@ -54,7 +54,7 @@ export class router {
     return query;
   }
 
-  setRoutes(route_tree, trunk = '', hierarchy = [], locked = null) {
+  setRoutes(route_tree, trunk = '', hierarchy = []) {
     let route_array = [];
     for (let i=0; i<route_tree.length; i++) {
       const route = route_tree[i];
@@ -75,20 +75,34 @@ export class router {
         throw new TypeError('route_branch[1] must be a React component. Instead received: ' + String(route[1]));
         return null;
       }
-      else if (route.length >= 3 && !(Array.isArray(route[2]) || route[2] === null)) {
-        throw new TypeError('route_branch[2] must be either null or an array. Instead received: ' + String(route[2]));
-        return null;
-      }
       else if (route[0] === null && route.length === 2) {
-        throw new TypeError('route_branch[2] must be an array, if route_branch[0] is null.');
+        throw new TypeError('route_branch[2] must be an array of route_branches, if route_branch[0] is null.');
         return null;
       }
-      else if (route.length === 4 && typeof route[3] !== 'boolean') {
-        throw new TypeError('route_branch[3] must be a boolean. Instead received: ' + String(route[3]));
+      else if (route.length === 3 && !(Array.isArray(route[2]) || route[2].constructor === Object)) {
+        throw new TypeError('route_branch[2] must be either a route_options object, or an array of route_branches. Instead received: ' + String(route[2]));
+        return null;
+      }
+      else if (route.length === 4 && route[2].constructor !== Object) {
+        throw new TypeError('route_branch[2] must be a route_options object. Instead received: ' + String(route[2]));
+        return null;
+      }
+      else if (route.length === 4 && !Array.isArray(route[3])) {
+        throw new TypeError('route_branch[3] must be an array of route_branches. Instead received: ' + String(route[3]));
         return null;
       }
 
-      const has_children = Array.isArray(route[2]);
+      let children = [];
+      switch (route.length) {
+        case 4:
+          children = route[3];
+          break;
+        case 3:
+          if (Array.isArray(route[2])) {
+            children = route[2];
+          }
+          break;
+      }
       let new_trunk = '';
       if (route[0] === null || route[0] === '') {
         new_trunk = trunk;
@@ -100,32 +114,41 @@ export class router {
         new_trunk = trunk + '/' + route[0];
       }
       const new_hierarchy = [...hierarchy, route[1]];
-      const new_locked = (route[3] !== undefined) ? route[3] : locked;
-      if (has_children === false) {
+      const options = (route.length >= 3) ? route[2] : {};
+      if (children.length === 0) {
+        if (options.is_default === true) {
+          route_array.push([
+            trunk,
+            new_hierarchy,
+            options,
+          ]);
+        }
         route_array.push([
           new_trunk,
           new_hierarchy,
-          new_locked,
+          options,
         ]);
       }
       else {
-        route_array = [...route_array, ...this.setRoutes(route[2], new_trunk, new_hierarchy, new_locked)];
+        if (options.is_default === true) {
+          throw new TypeError('route_branch must have no children, if route_options.is_default === true');
+          return null;
+        }
+        else {
+          route_array = [...route_array, ...this.setRoutes(route[2], new_trunk, new_hierarchy)];
+        }
       }
     }
     return route_array;
   }
 
-  match(child_props = {}, is_authenticated) {
+  match(child_props = {}) {
     if (typeof child_props !== 'object') {
       throw new TypeError('child_props must be an object. Instead received: ' + String(child_props));
       return null;
     }
     else if (child_props.router !== undefined) {
       throw new TypeError('child_props cannot have the property: ' + 'router');
-      return null;
-    }
-    else if (typeof is_authenticated !== 'boolean') {
-      throw new TypeError('is_authenticated must be a boolean. Instead received: ' + String(is_authenticated));
       return null;
     }
 
@@ -141,7 +164,6 @@ export class router {
       const route = this.routes[i];
       const route_path = route[0].split('/');
       const hierarchy = route[1];
-      const locked = route[2]
       let is_match = true;
       let params = {};
 
@@ -159,17 +181,9 @@ export class router {
         }
       }
       if (is_match === true) {
-        if (is_authenticated === false && locked === true) {
-          child = 1;
-        }
-        else if (is_authenticated === true && locked === false) {
-          child = -1;
-        }
-        else {
-          child_props.router.params = params;
-          for (let j=hierarchy.length-1; j>=0; j--) {
-            child = React.createElement(hierarchy[j], child_props, child);
-          }
+        child_props.router.params = params;
+        for (let j=hierarchy.length-1; j>=0; j--) {
+          child = React.createElement(hierarchy[j], child_props, child);
         }
         break;
       }

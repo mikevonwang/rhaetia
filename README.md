@@ -35,23 +35,26 @@ class App extends React.Component {
     this.state = {};
 
     this.router = new Rhaetia.router(this, [
-      // These 2 routes are viewable to unauthenticated users only. They are both wrapped in a
-      // "Front" React Component.
+      // These 2 routes are both wrapped in a "Front" React Component.
       [null, Front, [
         ['login', Login],
         ['register', Register],
-      ], false],
+      ]],
 
-      // These 4 routes are viewable to authenticated users only. They are all wrapped in a
-      // "Main" React Component. The 3rd and 4th routes include url parameters.
+      // These 4 routes are wrapped in a "Main" React Component.
+      // The 2nd route has 2 children; the first child is marked as default.
+      // The 3rd and 4th routes include url parameters.
       [null, Main, [
         ['', Home],
-        ['settings', Settings],
+        ['settings', Settings, [
+          ['profile', SettingsProfile, {is_default: true}],
+          ['account', SettingsAccount],
+        ]],
         ['post/:post_id', Post],
         [':username', Profile],
-      ], true],
+      ]],
 
-      // This route is viewable to all users.
+      // This route has no children.
       ['terms', TermsConditions],
     ]);
   }
@@ -68,24 +71,10 @@ onDidNavigate() {
     key: 'MyElement',
   };
 
-  // This boolean is used by Rhaetia to decide whether a user should be able to view a route or not
-  const is_logged_in = this.state.is_logged_in;
-
-  let child = this.router.match(element_props, is_logged_in);
-
-  // If the user is allowed to view the matched route, then setState() is called. Otherwise, the app
-  // kicks the user out to a route they are allowed to see.
-  if (child === 1) {
-    this.router.replace('/login');
-  }
-  else if (child === -1) {
-    this.router.replace('/');
-  }
-  else {
-    this.setState({
-      child: child,
-    });
-  }
+  // Call setState() to update the children of your top-level React component
+  this.setState({
+    child: this.router.match(element_props),
+  });
 }
 ```
 
@@ -221,19 +210,42 @@ Consider the following examples:
 
 The React element that matches a certain `route_path`. Multiple `route_branch` arrays can have the same `route_element` value.
 
-**3.** `route_children` **Array | null** *required | optional*
+**3.** `route_options` **Object** *optional*
 
-A `route_tree` array of child routes. This is usually an optional parameter, but is required if `route_path` is `null`.
+An object with properties declaring optional properties of this route. Valid properties are:
 
-**4.** `route_locked` **Boolean | undefined** *optional*
+- `is_default` **Boolean** *optional*
 
-Signifies whether or not the authentication status of a user affects their ability to view the route. This is actually a ternary value:
+  If `true`, then this route will behave as if its `route_path` were either its given value or `''`. For example:
 
-`true` if only authenticated users should be able to access this route.
+  ```javascript
+  // The first route will match both 'settings/profile' and 'settings'.
+  // The second route will match only 'settings/account'.
+  ['settings', Settings, [
+    ['profile', SettingsProfile, {is_default: true}],
+    ['account', SettingsAccount],
+  ]],
+  ```
 
-`false` if only unauthenticated users should be able to access this route.
+  This is equivalent to just setting `route_path` to `''`. This example below behaves exactly like the one above:
 
-`undefined` if all users should be able to access this route.
+  ```javascript
+  ['settings', Settings, [
+    ['', SettingsProfile],
+    ['profile', SettingsProfile],
+    ['account', SettingsAccount],
+  ]],
+  ```
+
+  Also, if `is_default` is `true`, then this route must have no children.
+
+**3. or 4.** `route_children` **Array | null** *required | optional*
+
+A `route_tree` array of child routes.
+
+This is usually an optional parameter, but is required if `route_path` is `null`.
+
+If the 3rd item in this `route_branch` is `route_options`, then `route_children` must be the 4th item. Otherwise, if no `route_options` is given, `route_children` must be the 3rd item.
 
 #### Return value
 
@@ -241,9 +253,9 @@ A Rhaetia router.
 
 ---
 
-### `match(child_props, is_authenticated)`
+### `match(child_props)`
 
-Attempts to match the current url to a tree of React elements. This should be called in the `onDidNavigate()` function passed to `listen()`.
+Attempts to match the current url to a tree of React elements. This should be called in the `onDidNavigate()` function.
 
 #### Parameters
 
@@ -251,19 +263,9 @@ Attempts to match the current url to a tree of React elements. This should be ca
 
 An object of properties that each React element matched by the current url should have.
 
-##### `is_authenticated` **Boolean**
-
-`true` if user is authenticated, `false` otherwise.
-
 #### Return value
 
-Either:
-
-1. A `React Element` matching the current url.
-
-2. The number `1`, if the user is not authenticated and is accessing a route with `route_locked` set to `true`.
-
-3. The number `-1`, if the user is authenticated and is accessing a route with `route_locked` set to `false`.
+A `React Element` matching the current url.
 
 ---
 
@@ -311,7 +313,7 @@ Any additional props that you wish to pass into the child of this component.
 
 #### Return value
 
-A React element presenting the child of this component.
+A React element representing the child of this component.
 
 ---
 

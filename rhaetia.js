@@ -37,7 +37,7 @@ export class router {
 
   getPath() {
     let path = window.location.pathname.substring(1).split('/');
-    if (path.length > 2 && path[path.length-1] === '') {
+    if (path.length > 1 && path[path.length-1] === '') {
       path.pop();
     }
     return path;

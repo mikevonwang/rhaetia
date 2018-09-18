@@ -118,7 +118,7 @@ class Login extends React.Component {
 }
 ```
 
-**6.** To create intra-app links that don't refresh your entire app, use `React.A`. With some adjustments, you could also use the shorthand `A`:
+**6.** To create intra-app links that don't refresh your entire app, use `Rhaetia.A`. With some adjustments, you could also use the shorthand `A`:
 
 ```javascript
 render() {

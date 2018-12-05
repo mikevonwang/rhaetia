@@ -118,7 +118,7 @@ class Login extends React.Component {
 }
 ```
 
-**6.** To create intra-app links that don't refresh your entire app, use `React.A`. With some adjustments, you could also use the shorthand `A`:
+**6.** To create intra-app links that don't refresh your entire app, use `Rhaetia.A`. With some adjustments, you could also use the shorthand `A`:
 
 ```javascript
 render() {
@@ -238,6 +238,34 @@ An object with properties declaring optional properties of this route. Valid pro
   ```
 
   Also, if `is_default` is `true`, then this route must have no children.
+
+- `match_mode`  **String** *optional*
+
+  Can be one of three values: `'exact'`, `'forgiving'`, or `'loose'`. Default value is `'exact'`.
+
+  If `'exact'`, then this route will only match urls that follow the pattern of its `route_path` exactly and don't have any extra pieces. For example:
+
+  ```javascript
+  // Both these routes will match `terms`, but not `terms/current`.
+  ['terms', Terms],
+  ['terms', Terms, {match_mode: 'exact'}],
+  ```
+
+  If `'forgiving'`, then this route will match urls that have extra pieces beyond the pattern of its `route_path`. It will replace the url with one that matches the pattern of its `route_path`, i.e. it will truncate the url and remove the extra pieces.
+
+  ```javascript
+  // This route will match both `terms` and `terms/current`. In the latter case, it will replace
+  // the url with `terms`.
+  ['terms', Terms, {match_mode: 'forgiving'}],
+  ```
+
+  If `'loose'`, then this route will also match urls that have extra pieces beyond the pattern of its `route_path`, but it will not truncate the url.
+
+  ```javascript
+  // This route will match both `terms` and `terms/current`. In the latter case, it will leave
+  // the url as `terms/current`.
+  ['terms', Terms, {match_mode: 'loose'}],
+  ```
 
 **3. or 4.** `route_children` **Array | null** *required | optional*
 

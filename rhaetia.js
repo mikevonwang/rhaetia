@@ -93,15 +93,20 @@ export class router {
       }
 
       let children = [];
+      let options = {};
       switch (route.length) {
         case 4:
           children = route[3];
-          break;
+          options = route[2];
+        break;
         case 3:
           if (Array.isArray(route[2])) {
             children = route[2];
           }
-          break;
+          else {
+            options = route[2];
+          }
+        break;
       }
       let new_trunk = '';
       if (route[0] === null || route[0] === '') {
@@ -114,29 +119,26 @@ export class router {
         new_trunk = trunk + '/' + route[0];
       }
       const new_hierarchy = [...hierarchy, route[1]];
-      const options = (route.length >= 3) ? Object.assign({
+      const full_options = Object.assign({
         is_default: false,
         match_mode: 'exact',
-      }, route[2]) : {
-        is_default: false,
-        match_mode: 'exact',
-      };
+      }, options);
       if (children.length === 0) {
         if (options.is_default === true) {
           route_array.push([
             trunk,
             new_hierarchy,
-            options,
+            full_options,
           ]);
         }
         route_array.push([
           new_trunk,
           new_hierarchy,
-          options,
+          full_options,
         ]);
       }
       else {
-        if (options.is_default === true) {
+        if (full_options.is_default === true) {
           throw new TypeError('route_branch must have no children, if route_options.is_default === true');
           return null;
         }

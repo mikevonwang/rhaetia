@@ -114,7 +114,13 @@ export class router {
         new_trunk = trunk + '/' + route[0];
       }
       const new_hierarchy = [...hierarchy, route[1]];
-      const options = (route.length >= 3) ? route[2] : {};
+      const options = (route.length >= 3) ? Object.assign({
+        is_default: false,
+        match_mode: 'exact',
+      }, route[2]) : {
+        is_default: false,
+        match_mode: 'exact',
+      };
       if (children.length === 0) {
         if (options.is_default === true) {
           route_array.push([
@@ -167,7 +173,10 @@ export class router {
       let is_match = true;
       let params = {};
 
-      if (route_path.length !== this.path.length) {
+      if (
+        ((route[2].match_mode === 'forgiving' || route[2].match_mode === 'loose') && route_path.length > this.path.length) ||
+        (route[2].match_mode === 'exact' && route_path.length !== this.path.length)
+      ) {
         is_match = false;
       }
       else {
@@ -184,6 +193,9 @@ export class router {
         child_props.router.params = params;
         for (let j=hierarchy.length-1; j>=0; j--) {
           child = React.createElement(hierarchy[j], child_props, child);
+        }
+        if (route[2].match_mode === 'forgiving' && route_path.length < this.path.length) {
+          rhaetia_history.replace('/' + this.path.slice(0,route_path.length).join('/'));
         }
         break;
       }

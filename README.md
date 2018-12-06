@@ -176,11 +176,13 @@ A 2-4 element array detailing a single route in the app. The elements are, in or
 
 Used to match routes to the url.
 
-If the `route_path` contains `/` characters, it is split along those characters, and each piece compared individually.
+If the `route_path` contains `/` characters, it is split along those characters into `route_path_piece`'s, and each `route_path_piece` compared individually.
 
-* Pieces beginning with an alphabetic character are treated as literal and exact matches.
+* `route_path_piece`'s beginning with an alphabetic character are treated as literal and exact matches.
 
-* Pieces beginning with `:` (and up to the next `/`, or the end of the string) are treated as url parameters, with the value of the url parameter being stored under `this.props.params` with the piece as the key.
+* `route_path_piece`'s beginning with `:` are treated as url parameters, with the value of the url parameter being stored under `this.props.params` with the piece as the key.
+
+* `route_path_piece`'s beginning with `:` and ending with `?` are treated as optional url parameters. They behave just like normal url parameters, except when the url doesn't contain the parameter; in this case, `null` is stored in `this.props.params`. Only the last `route_path_piece` in a `route_path` may be an optional url parameter.
 
 If the `route_path` is `null`, the `route_children` element of the `route_branch` must exist and will be examined for matching.
 
@@ -200,6 +202,12 @@ Consider the following examples:
 //   this.props.params.photo_id = '4314955'
 //   this.props.query.mode      = 'guest'
 ['photo/:photo_id/edit', MyElement]
+
+// Matches 'example.com/admin/posts', with the following stored in the matched element:
+//   this.props.params.post_id = null
+// Also matches 'example.com/admin/posts/125', with the following stored in the matched element:
+//   this.props.params.post_id = '125'
+['admin/posts/:post_id?', MyElement]
 
 // Defers matching to the route_branches in the children array.
 // If one of those child routes is a match, it will be wrapped in MyElement.

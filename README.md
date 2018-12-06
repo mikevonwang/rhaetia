@@ -305,13 +305,15 @@ A `React Element` matching the current url.
 
 ---
 
-### `push()`, `replace()`
+### `push()`, `replace()`, `block()`
 
-Aliases of [`history.push()` and `history.replace()`](https://github.com/ReactTraining/history#navigation).
+Aliases of [`history.push()`, `history.replace()` and `history.block()`](https://github.com/ReactTraining/history#navigation).
 
 Use `push()` whenever you want the user to be able to use their browser's back button to return to the current route, e.g. when navigating to a new route upon a button click.
 
 Use `replace()` whenever you don't want the user to be able to use their browser's back button to return to the current route, e.g. when kicking the user out of a route they aren't allowed to view and onto one they are allowed to.
+
+Use `block()` whenever you want to ask the user for confirmation whether or not they actually wish to leave a page when they click a button or link that will navigate them away. This function returns another function, which you can store and then call to prevent the confirmation dialog from appearing.
 
 These functions should be called on `this.props.router`, i.e.
 
@@ -321,6 +323,30 @@ this.props.router.push('/settings');
 ```javascript
 this.props.router.replace('/login');
 ```
+```javascript
+this.unblock = this.props.router.block((new_location) => {
+  if (location.pathname !== new_location.pathname) {
+    return ('Are you sure you wish to leave this page?');
+  }
+});
+```
+---
+
+### `setBlockDialog(getUserConfirmation)`
+
+Sets a function to be called whenever `block()` is called, and Rhaetia needs to check whether or not the user actually wants to leave a page (i.e. customizes the confirmation dialog).
+
+#### Parameters
+
+##### `getUserConfirmation` **Function**
+
+A function that takes 2 arguments:
+
+1. `message` - the message displayed in the confirmation dialog.
+
+2. `callback` - call this function with `true` if the user indicates that they do wish to leave a page, and with `false` if otherwise.
+
+
 ---
 
 ### `Rhaetia.renderChild(child, props)`

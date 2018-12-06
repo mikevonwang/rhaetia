@@ -1,4 +1,4 @@
-# rhaetia
+# Rhaetia
 
 Rhaetia is a lightweight router for React.
 
@@ -176,11 +176,13 @@ A 2-4 element array detailing a single route in the app. The elements are, in or
 
 Used to match routes to the url.
 
-If the `route_path` contains `/` characters, it is split along those characters, and each piece compared individually.
+If the `route_path` contains `/` characters, it is split along those characters into `route_path_piece`'s, and each `route_path_piece` compared individually.
 
-* Pieces beginning with an alphabetic character are treated as literal and exact matches.
+* `route_path_piece`'s beginning with an alphabetic character are treated as literal and exact matches.
 
-* Pieces beginning with `:` (and up to the next `/`, or the end of the string) are treated as url parameters, with the value of the url parameter being stored under `this.props.params` with the piece as the key.
+* `route_path_piece`'s beginning with `:` are treated as url parameters, with the value of the url parameter being stored under `this.props.params` with the piece as the key.
+
+* `route_path_piece`'s beginning with `:` and ending with `?` are treated as optional url parameters. They behave just like normal url parameters, except when the url doesn't contain the parameter; in this case, `null` is stored in `this.props.params`. Only the last `route_path_piece` in a `route_path` may be an optional url parameter.
 
 If the `route_path` is `null`, the `route_children` element of the `route_branch` must exist and will be examined for matching.
 
@@ -200,6 +202,12 @@ Consider the following examples:
 //   this.props.params.photo_id = '4314955'
 //   this.props.query.mode      = 'guest'
 ['photo/:photo_id/edit', MyElement]
+
+// Matches 'example.com/admin/posts', with the following stored in the matched element:
+//   this.props.params.post_id = null
+// Also matches 'example.com/admin/posts/125', with the following stored in the matched element:
+//   this.props.params.post_id = '125'
+['admin/posts/:post_id?', MyElement]
 
 // Defers matching to the route_branches in the children array.
 // If one of those child routes is a match, it will be wrapped in MyElement.
@@ -297,13 +305,15 @@ A `React Element` matching the current url.
 
 ---
 
-### `push()`, `replace()`
+### `push()`, `replace()`, `block()`
 
-Aliases of [`history.push()` and `history.replace()`](https://github.com/ReactTraining/history#navigation).
+Aliases of [`history.push()`, `history.replace()` and `history.block()`](https://github.com/ReactTraining/history#navigation).
 
 Use `push()` whenever you want the user to be able to use their browser's back button to return to the current route, e.g. when navigating to a new route upon a button click.
 
 Use `replace()` whenever you don't want the user to be able to use their browser's back button to return to the current route, e.g. when kicking the user out of a route they aren't allowed to view and onto one they are allowed to.
+
+Use `block()` whenever you want to ask the user for confirmation whether or not they actually wish to leave a page when they click a button or link that will navigate them away. This function returns another function, which you can store and then call to prevent the confirmation dialog from appearing.
 
 These functions should be called on `this.props.router`, i.e.
 
@@ -313,6 +323,30 @@ this.props.router.push('/settings');
 ```javascript
 this.props.router.replace('/login');
 ```
+```javascript
+this.unblock = this.props.router.block((new_location) => {
+  if (location.pathname !== new_location.pathname) {
+    return ('Are you sure you wish to leave this page?');
+  }
+});
+```
+---
+
+### `setBlockDialog(getUserConfirmation)`
+
+Sets a function to be called whenever `block()` is called, and Rhaetia needs to check whether or not the user actually wants to leave a page (i.e. customizes the confirmation dialog).
+
+#### Parameters
+
+##### `getUserConfirmation` **Function**
+
+A function that takes 2 arguments:
+
+1. `message` - the message displayed in the confirmation dialog.
+
+2. `callback` - call this function with `true` if the user indicates that they do wish to leave a page, and with `false` if otherwise.
+
+
 ---
 
 ### `Rhaetia.renderChild(child, props)`

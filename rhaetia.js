@@ -2,7 +2,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import createHistory from 'history/createBrowserHistory';
 
-const rhaetia_history = createHistory();
+let getUserConfirmation;
+
+const rhaetia_history = createHistory({
+  getUserConfirmation: (message, callback) =>{
+    if (getUserConfirmation) {
+      getUserConfirmation(message, callback);
+    }
+    else {
+      callback(window.confirm(message));
+    }
+  },
+});
 
 export class router {
 
@@ -27,6 +38,7 @@ export class router {
 
     this.push = rhaetia_history.push;
     this.replace = rhaetia_history.replace;
+    this.block = rhaetia_history.block;
 
     rhaetia_history.listen(() => {
       this.path = this.getPath();
@@ -93,15 +105,20 @@ export class router {
       }
 
       let children = [];
+      let options = {};
       switch (route.length) {
         case 4:
           children = route[3];
-          break;
+          options = route[2];
+        break;
         case 3:
           if (Array.isArray(route[2])) {
             children = route[2];
           }
-          break;
+          else {
+            options = route[2];
+          }
+        break;
       }
       let new_trunk = '';
       if (route[0] === null || route[0] === '') {
@@ -114,29 +131,45 @@ export class router {
         new_trunk = trunk + '/' + route[0];
       }
       const new_hierarchy = [...hierarchy, route[1]];
-      const options = (route.length >= 3) ? Object.assign({
+      const full_options = Object.assign({
         is_default: false,
         match_mode: 'exact',
-      }, route[2]) : {
-        is_default: false,
-        match_mode: 'exact',
-      };
+      }, options);
       if (children.length === 0) {
         if (options.is_default === true) {
+          const empty_param_object = {};
+          route[0]
+          .split('/')
+          .filter((piece) => {
+            return (piece[0] === ':');
+          })
+          .map((piece) => {
+            if (piece[piece.length-1] === '?') {
+              return piece.substring(1,piece.length-1);
+            }
+            else {
+              return piece.substring(1);
+            }
+          })
+          .forEach((piece) => {
+            empty_param_object[piece] = null;
+          });
           route_array.push([
             trunk,
             new_hierarchy,
-            options,
+            full_options,
+            empty_param_object,
           ]);
         }
         route_array.push([
           new_trunk,
           new_hierarchy,
-          options,
+          full_options,
+          {}
         ]);
       }
       else {
-        if (options.is_default === true) {
+        if (full_options.is_default === true) {
           throw new TypeError('route_branch must have no children, if route_options.is_default === true');
           return null;
         }
@@ -161,8 +194,10 @@ export class router {
     child_props.router = {
       push: this.push,
       replace: this.replace,
+      block: this.block,
       path: this.path,
       query: this.query,
+      setBlockDialog: this.setBlockDialog,
     };
 
     let child = null;
@@ -171,18 +206,22 @@ export class router {
       const route_path = route[0].split('/');
       const hierarchy = route[1];
       let is_match = true;
-      let params = {};
+      let params = route[3];
 
       if (
-        ((route[2].match_mode === 'forgiving' || route[2].match_mode === 'loose') && route_path.length > this.path.length) ||
-        (route[2].match_mode === 'exact' && route_path.length !== this.path.length)
+        ((route[2].match_mode === 'forgiving' || route[2].match_mode === 'loose') && (route_path.length > this.path.length)) ||
+        (route[2].match_mode === 'exact' && (
+          ((route_path[route_path.length-1][0] === ':' && route[0][route[0].length-1] === '?') && route_path.length !== this.path.length && route_path.length-1 !== this.path.length) ||
+          ((route_path[route_path.length-1][0] !== ':' || route[0][route[0].length-1] !== '?') && route_path.length !== this.path.length)
+        ))
       ) {
         is_match = false;
       }
       else {
         for (let j=0; j<route_path.length; j++) {
           if (route_path[j][0] === ':') {
-            params[route_path[j].substring(1)] = (this.path[j] !== '') ? this.path[j] : null;
+            const param_name = (route_path[j][route_path[j].length-1] === '?') ? route_path[j].substring(1, route_path[j].length-1) : route_path[j].substring(1);
+            params[param_name] = (this.path[j] !== undefined && this.path[j] !== '') ? this.path[j] : null;
           }
           else if (route_path[j] !== this.path[j]) {
             is_match = false;
@@ -195,12 +234,16 @@ export class router {
           child = React.createElement(hierarchy[j], child_props, child);
         }
         if (route[2].match_mode === 'forgiving' && route_path.length < this.path.length) {
-          rhaetia_history.replace('/' + this.path.slice(0,route_path.length).join('/'));
+          this.replace('/' + this.path.slice(0,route_path.length).join('/'));
         }
         break;
       }
     }
     return child;
+  }
+
+  setBlockDialog(newGetUserConfirmation) {
+    getUserConfirmation = newGetUserConfirmation;
   }
 
 };

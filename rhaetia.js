@@ -137,16 +137,35 @@ export class router {
       }, options);
       if (children.length === 0) {
         if (options.is_default === true) {
+          const empty_param_object = {};
+          route[0]
+          .split('/')
+          .filter((piece) => {
+            return (piece[0] === ':');
+          })
+          .map((piece) => {
+            if (piece[piece.length-1] === '?') {
+              return piece.substring(1,piece.length-1);
+            }
+            else {
+              return piece.substring(1);
+            }
+          })
+          .forEach((piece) => {
+            empty_param_object[piece] = null;
+          });
           route_array.push([
             trunk,
             new_hierarchy,
             full_options,
+            empty_param_object,
           ]);
         }
         route_array.push([
           new_trunk,
           new_hierarchy,
           full_options,
+          {}
         ]);
       }
       else {
@@ -187,7 +206,7 @@ export class router {
       const route_path = route[0].split('/');
       const hierarchy = route[1];
       let is_match = true;
-      let params = {};
+      let params = route[3];
 
       if (
         ((route[2].match_mode === 'forgiving' || route[2].match_mode === 'loose') && (route_path.length > this.path.length)) ||

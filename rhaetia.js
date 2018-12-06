@@ -2,7 +2,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import createHistory from 'history/createBrowserHistory';
 
-const rhaetia_history = createHistory();
+let getUserConfirmation;
+
+const rhaetia_history = createHistory({
+  getUserConfirmation: (message, callback) =>{
+    if (getUserConfirmation) {
+      getUserConfirmation(message, callback);
+    }
+    else {
+      callback(window.confirm(message));
+    }
+  },
+});
 
 export class router {
 
@@ -27,6 +38,7 @@ export class router {
 
     this.push = rhaetia_history.push;
     this.replace = rhaetia_history.replace;
+    this.block = rhaetia_history.block;
 
     rhaetia_history.listen(() => {
       this.path = this.getPath();
@@ -163,8 +175,10 @@ export class router {
     child_props.router = {
       push: this.push,
       replace: this.replace,
+      block: this.block,
       path: this.path,
       query: this.query,
+      setUserConfirmation: this.setUserConfirmation,
     };
 
     let child = null;
@@ -201,12 +215,16 @@ export class router {
           child = React.createElement(hierarchy[j], child_props, child);
         }
         if (route[2].match_mode === 'forgiving' && route_path.length < this.path.length) {
-          rhaetia_history.replace('/' + this.path.slice(0,route_path.length).join('/'));
+          this.replace('/' + this.path.slice(0,route_path.length).join('/'));
         }
         break;
       }
     }
     return child;
+  }
+
+  setUserConfirmation(newGetUserConfirmation) {
+    getUserConfirmation = newGetUserConfirmation;
   }
 
 };

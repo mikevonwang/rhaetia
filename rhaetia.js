@@ -178,7 +178,7 @@ export class router {
       block: this.block,
       path: this.path,
       query: this.query,
-      setUserConfirmation: this.setUserConfirmation,
+      setBlockDialog: this.setBlockDialog,
     };
 
     let child = null;
@@ -223,7 +223,7 @@ export class router {
     return child;
   }
 
-  setUserConfirmation(newGetUserConfirmation) {
+  setBlockDialog(newGetUserConfirmation) {
     getUserConfirmation = newGetUserConfirmation;
   }
 

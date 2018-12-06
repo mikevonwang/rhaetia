@@ -1,4 +1,4 @@
-# rhaetia
+# Rhaetia
 
 Rhaetia is a lightweight router for React.
 

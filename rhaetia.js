@@ -176,15 +176,19 @@ export class router {
       let params = {};
 
       if (
-        ((route[2].match_mode === 'forgiving' || route[2].match_mode === 'loose') && route_path.length > this.path.length) ||
-        (route[2].match_mode === 'exact' && route_path.length !== this.path.length)
+        ((route[2].match_mode === 'forgiving' || route[2].match_mode === 'loose') && (route_path.length > this.path.length)) ||
+        (route[2].match_mode === 'exact' && (
+          ((route_path[route_path.length-1][0] === ':' && route[0][route[0].length-1] === '?') && route_path.length !== this.path.length && route_path.length-1 !== this.path.length) ||
+          ((route_path[route_path.length-1][0] !== ':' || route[0][route[0].length-1] !== '?') && route_path.length !== this.path.length)
+        ))
       ) {
         is_match = false;
       }
       else {
         for (let j=0; j<route_path.length; j++) {
           if (route_path[j][0] === ':') {
-            params[route_path[j].substring(1)] = (this.path[j] !== '') ? this.path[j] : null;
+            const param_name = (route_path[j][route_path[j].length-1] === '?') ? route_path[j].substring(1, route_path[j].length-1) : route_path[j].substring(1);
+            params[param_name] = (this.path[j] !== undefined && this.path[j] !== '') ? this.path[j] : null;
           }
           else if (route_path[j] !== this.path[j]) {
             is_match = false;

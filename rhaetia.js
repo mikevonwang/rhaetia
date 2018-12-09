@@ -256,6 +256,9 @@ export class A extends React.Component {
 
   goto(e) {
     e.preventDefault();
+    if (this.props.onClick) {
+      this.props.onClick(e);
+    }
     if (this.props.replace === true) {
       rhaetia_history.replace(this.props.href);
     }

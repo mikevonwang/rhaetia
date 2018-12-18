@@ -383,7 +383,7 @@ A React element representing the child of this component.
 
 Wrapper for an `<a/>` tag with a valid `href` attribute, that uses `push()` (by default) to take the user to that `href`. Used for intra-app links in single page apps, where a regular `<a/>` tag is undesirable because it would cause the entire app to reload.
 
-To use, place an `<Rhaetia.A/>` in your React component wherever you want an intra-app link, and give it an `href` attribute;
+To use, place a `<Rhaetia.A/>` in your React component wherever you want an intra-app link, and give it an `href` attribute;
 
 ```javascript
 <Rhaetia.A href='/photos'>{'Your Photos'}</Rhaetia.A>
@@ -412,15 +412,13 @@ This cleans up the above syntax a little:
 <A href='/photos'>{'Your Photos'}</A>
 ```
 
-#### Attributes
+#### Props
+
+All props except for `replace` are passed down onto the rendered `<a/>` tag.
 
 ##### `href` **String** *required*
 
 Used as the `href` attribute for the rendered `<a/>` element. Must be a relative URL; links with absolute URLs should directly use a regular `<a/>` element.
-
-##### `className` **String** *optional*
-
-Used as the `class` attribute for the rendered `<a/>` element.
 
 ##### `replace` **Boolean** *optional*
 

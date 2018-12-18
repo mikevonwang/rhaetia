@@ -268,17 +268,15 @@ export class A extends React.Component {
   }
 
   render() {
-    return React.createElement('a', {
-      href: this.props.href,
-      className: this.props.className,
+    return React.createElement('a', Object.assign({}, this.props, {
       onClick: (e) => this.goto(e),
-    }, this.props.children);
+    }), this.props.children);
   }
 
 };
 A.propTypes = {
   href: PropTypes.string.isRequired,
-  className: PropTypes.string,
+  onClick: PropTypes.func,
   replace: PropTypes.bool,
 }
 

@@ -86,7 +86,7 @@ render() {
 }
 ```
 
-**5.** For any React components in your `route_tree` with child components, use `Rhaetia.renderChild()` to render those children:
+**5.** In any React components in your `route_tree` that are passed child components, use `Rhaetia.renderChild()` to render those children:
 
 ```javascript
 class Main extends React.Component {
@@ -184,7 +184,7 @@ If the `route_path` contains `/` characters, it is split along those characters 
 
 * `route_path_piece`'s beginning with `:` and ending with `?` are treated as optional url parameters. They behave just like normal url parameters, except when the url doesn't contain the parameter; in this case, `null` is stored in `this.props.params`. Only the last `route_path_piece` in a `route_path` may be an optional url parameter.
 
-If the `route_path` is `null`, the `route_children` element of the `route_branch` must exist and will be examined for matching.
+If the `route_path` is `null`, the `route_children` element of this `route_branch` must exist and will be examined for matching.
 
 If the url being matched against has query parameters, they will be stored in `this.props.query` as key-value pairs.
 
@@ -192,26 +192,36 @@ Consider the following examples:
 
 ```javascript
 // Matches 'example.com/login'
-['login', MyElement]
+['login', Login],
 
 // Matches 'example.com/user/1994', with the following stored in the matched element:
 //   this.props.params.user_id = '1994'
-['user/:user_id', MyElement]
+['user/:user_id', User],
 
 // Matches 'example.com/photo/4314955/edit?mode=guest', with the following stored in the matched element:
 //   this.props.params.photo_id = '4314955'
 //   this.props.query.mode      = 'guest'
-['photo/:photo_id/edit', MyElement]
+['photo/:photo_id/edit', Photo],
 
 // Matches 'example.com/admin/posts', with the following stored in the matched element:
 //   this.props.params.post_id = null
 // Also matches 'example.com/admin/posts/125', with the following stored in the matched element:
 //   this.props.params.post_id = '125'
-['admin/posts/:post_id?', MyElement]
+['admin/posts/:post_id?', Post],
 
-// Defers matching to the route_branches in the children array.
+// Behaves as follows:
+//   'example.com/graphs'                renders  <Graph/>
+//   'example.com/graphs/19'             renders  <Graph/>
+//   'example.com/graphs/19/reviews'     renders  <Graph><Review/></Graph>
+//   'example.com/graphs/19/reviews/75'  renders  <Graph><Review/></Graph>
+// With `graph` and `review_id` stored in `this.props.params` of each rendered element.
+['graphs/:graph_id?', Graph, [
+  ['reviews/:review_id?', Review]
+]],
+
+// Defers matching to the route_branches in the `children` array.
 // If one of those child routes is a match, it will be wrapped in MyElement.
-[null, MyElement, children]
+[null, MyElement, children],
 ```
 
 **2.** `route_element` **React Component** *required*
@@ -222,15 +232,17 @@ The React element that matches a certain `route_path`. Multiple `route_branch` a
 
 An object with properties declaring optional properties of this route. Valid properties are:
 
-- `is_default` **Boolean** *optional*
+- `is_default` **Boolean**
 
-  If `true`, then this route will behave as if its `route_path` were either its given value or `''`. For example:
+  Default value is `false`. If `true`, then this route will behave as if its `route_path` were either its given value or `''`. For example:
 
   ```javascript
-  // The first route will match both 'settings/profile' and 'settings'.
-  // The second route will match only 'settings/account'.
   ['settings', Settings, [
+
+    // This first route will match both 'settings/profile' and 'settings'.
     ['profile', SettingsProfile, {is_default: true}],
+
+    // This second route will match only 'settings/account'.
     ['account', SettingsAccount],
   ]],
   ```
@@ -245,9 +257,7 @@ An object with properties declaring optional properties of this route. Valid pro
   ]],
   ```
 
-  Also, if `is_default` is `true`, then this route must have no children.
-
-- `match_mode`  **String** *optional*
+- `match_mode`  **String**
 
   Can be one of three values: `'exact'`, `'forgiving'`, or `'loose'`. Default value is `'exact'`.
 
@@ -275,6 +285,26 @@ An object with properties declaring optional properties of this route. Valid pro
   ['terms', Terms, {match_mode: 'loose'}],
   ```
 
+  If a `route_branch` has children, then `match_mode` will be ignored.
+
+- `needs_children` **Boolean**
+
+  Default value is `true`. If `false`, then a route will be matched with whether or not its children are matched with. For example:
+
+  ```javascript
+  // This first route tree will match both `graphs` and `graphs/bar`.
+  ['graphs', Graphs, {needs_children: false}, [
+    ['bar', GraphBar],
+  ]],
+
+  // This second route tree will match only `graphs/bar`.
+  ['graphs', Graphs, [
+    ['bar', GraphBar],
+  ]],
+  ```
+
+  If a `route_branch` has no children, then `needs_children` will be ignored.
+
 **3. or 4.** `route_children` **Array | null** *required | optional*
 
 A `route_tree` array of child routes.
@@ -291,7 +321,7 @@ A Rhaetia router.
 
 ### `match(child_props)`
 
-Attempts to match the current url to a tree of React elements. This should be called in the `onDidNavigate()` function.
+Attempts to match the current url to a tree of React elements. This should be called on `this.router` in your `onDidNavigate()` function.
 
 #### Parameters
 
@@ -383,7 +413,7 @@ A React element representing the child of this component.
 
 Wrapper for an `<a/>` tag with a valid `href` attribute, that uses `push()` (by default) to take the user to that `href`. Used for intra-app links in single page apps, where a regular `<a/>` tag is undesirable because it would cause the entire app to reload.
 
-To use, place an `<Rhaetia.A/>` in your React component wherever you want an intra-app link, and give it an `href` attribute;
+To use, place a `<Rhaetia.A/>` in your React component wherever you want an intra-app link, and give it an `href` attribute;
 
 ```javascript
 <Rhaetia.A href='/photos'>{'Your Photos'}</Rhaetia.A>
@@ -412,15 +442,13 @@ This cleans up the above syntax a little:
 <A href='/photos'>{'Your Photos'}</A>
 ```
 
-#### Attributes
+#### Props
+
+All props except for `replace` are passed down onto the rendered `<a/>` tag.
 
 ##### `href` **String** *required*
 
 Used as the `href` attribute for the rendered `<a/>` element. Must be a relative URL; links with absolute URLs should directly use a regular `<a/>` element.
-
-##### `className` **String** *optional*
-
-Used as the `class` attribute for the rendered `<a/>` element.
 
 ##### `replace` **Boolean** *optional*
 

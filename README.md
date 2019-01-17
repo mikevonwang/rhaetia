@@ -376,6 +376,25 @@ A function that takes 2 arguments:
 
 2. `callback` - call this function with `true` if the user indicates that they do wish to leave a page, and with `false` if otherwise.
 
+---
+
+### `set404()`
+
+Used to redirect to a 404 page without changing the url. In your top-level React component, create a function called `on404`. In this function, set `state.child` to your 404 component:
+
+```javascript
+on404() {
+  this.setState({
+    child: (<Error404/>),
+  });
+}
+```
+
+Then, whenever you wish to redirect to your 404 page, call:
+
+```javascript
+this.props.router.set404()
+```
 
 ---
 

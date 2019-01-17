@@ -31,6 +31,8 @@ export class router {
       return null;
     }
 
+    this.set404 = this.set404.bind(root);
+
     this.routes = this.setRoutes(route_tree);
 
     this.path = this.getPath();
@@ -205,6 +207,7 @@ export class router {
       path: this.path,
       query: this.query,
       setBlockDialog: this.setBlockDialog,
+      set404: this.set404,
     };
 
     let child = null;
@@ -248,6 +251,10 @@ export class router {
 
   setBlockDialog(newGetUserConfirmation) {
     getUserConfirmation = newGetUserConfirmation;
+  }
+
+  set404() {
+    this.on404();
   }
 
 };

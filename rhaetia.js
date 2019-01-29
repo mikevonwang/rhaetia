@@ -266,15 +266,17 @@ export class A extends React.Component {
   }
 
   goto(e) {
-    e.preventDefault();
+    if (!this.props.target) {
+      e.preventDefault();
+      if (this.props.replace === true) {
+        rhaetia_history.replace(this.props.href);
+      }
+      else {
+        rhaetia_history.push(this.props.href);
+      }
+    }
     if (this.props.onClick) {
       this.props.onClick(e);
-    }
-    if (this.props.replace === true) {
-      rhaetia_history.replace(this.props.href);
-    }
-    else {
-      rhaetia_history.push(this.props.href);
     }
   }
 

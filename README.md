@@ -26,69 +26,56 @@ plugins: [
 ],
 ```
 
-**2.** Create a `new Rhaetia.router()` in the `constructor()` of your top-level React component, and assign the result to `this.router`. The first argument is normally just `this`. The second argument is a `route_tree` array, and defines your app's routes.
+**2.** In your top-level React file, create a `route_tree` array that defines your app's routes.
 
 ```javascript
-class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
+const route_tree = [
+  // These 2 routes are both wrapped in a "Front" React Component.
+  [null, Front, [
+    ['login', Login],
+    ['register', Register],
+  ]],
 
-    this.router = new Rhaetia.router(this, [
-      // These 2 routes are both wrapped in a "Front" React Component.
-      [null, Front, [
-        ['login', Login],
-        ['register', Register],
-      ]],
+  // These 4 routes are wrapped in a "Main" React Component.
+  // The 2nd route has 2 children; the first child is marked as default.
+  // The 3rd and 4th routes include url parameters.
+  [null, Main, [
+    ['', Home],
+    ['settings', Settings, [
+      ['profile', SettingsProfile, {is_default: true}],
+      ['account', SettingsAccount],
+    ]],
+    ['post/:post_id', Post],
+    [':username', Profile],
+  ]],
 
-      // These 4 routes are wrapped in a "Main" React Component.
-      // The 2nd route has 2 children; the first child is marked as default.
-      // The 3rd and 4th routes include url parameters.
-      [null, Main, [
-        ['', Home],
-        ['settings', Settings, [
-          ['profile', SettingsProfile, {is_default: true}],
-          ['account', SettingsAccount],
-        ]],
-        ['post/:post_id', Post],
-        [':username', Profile],
-      ]],
-
-      // This route has no children.
-      ['terms', TermsConditions],
-    ]);
-  }
-}
+  // This route has no children.
+  ['terms', TermsConditions],
+]
 ```
 
-**3.** Create a `onDidNavigate()` function in your top-level React component, wherein `match()` is called, and the result is passed to `setState()`.
+**3.** In your `ReactDOM.render()` function, wrap your top-level React Component with a `Rhaetia.Router`. Give the router your `route_tree`:
 
 ```javascript
-onDidNavigate() {
-  // This object will be available to every matched React element as this.props
-  const element_props = {
-    data: this.state,
-    key: 'MyElement',
-  };
-
-  // Call setState() to update the children of your top-level React component
-  this.setState({
-    child: this.router.match(element_props),
-  });
-}
+ReactDOM.render((
+  <Rhaetia.Router routeTree={route_tree}>
+    <App/>
+  </Rhaetia.Router>
+), document.getElementById('root'));
 ```
 
-**4.** Return the result of step 3 in the `render()` of your top-level React component.
+**4.** Return `this.props.children` in the `render()` of any component that is assigned children according to your `route_tree` (and also in your top-level React Component).
 
 ```javascript
 render() {
-  return (this.state.child);
+  return (this.props.children);
 }
 ```
 
-**5.** In any React components in your `route_tree` that are passed child components, use `Rhaetia.renderChild()` to render those children:
+**5.** To pass additional props to a Component's Rhaetia-assigned children, use `Rhaetia.renderChild`:
 
 ```javascript
+// This Component will pass a `message` prop to any child that Rhaetia assigns to it
 class Main extends React.Component {
   constructor(props) {
     super(props);
@@ -104,6 +91,7 @@ class Main extends React.Component {
   }
 }
 
+// This Component will receive a `message` prop from its parent
 class Login extends React.Component {
   constructor(props) {
     super(props);
@@ -118,7 +106,7 @@ class Login extends React.Component {
 }
 ```
 
-**6.** To create intra-app links that don't refresh your entire app, use `Rhaetia.A`. With some adjustments, you could also use the shorthand `A`:
+**6.** To create intra-app links that don't refresh your entire app, use `Rhaetia.A`. With some extra setup, you could also use the shorthand `A`:
 
 ```javascript
 render() {
@@ -128,23 +116,15 @@ render() {
 
 ## Documentation
 
-### `new Rhaetia.router(root, route_tree)`
+### `<Rhaetia.Router/>`
 
-Creates a new Rhaetia router. This should be called in the `constructor()` function of your top-level React component.
+A Rhaetia router. Rhaetia.Router is a React Component, and should wrap your top-level Component (see step 3 in "Usage and Example" for an example). This Component can take two props: `routeTree` and `page404`.
 
-#### Parameters
+#### Props
 
-##### `root` **React Component** *required*
+##### `routeTree` **Array** *required*
 
-Your top-level React Component. Usually passed in as `this`:
-
-```javascript
-this.router = new Rhaetia.router(this, route_tree);
-```
-
-##### `route_tree` **Array** *required*
-
-An array detailing every route in the app.
+A `route_tree` array detailing every route in the app.
 
 Every item in the array must be a `route_branch` array. These arrays must be ordered from most specific to most general, i.e. routes with url parameters should appear after routes without them. For example:
 
@@ -313,25 +293,9 @@ This is usually an optional parameter, but is required if `route_path` is `null`
 
 If the 3rd item in this `route_branch` is `route_options`, then `route_children` must be the 4th item. Otherwise, if no `route_options` is given, `route_children` must be the 3rd item.
 
-#### Return value
+##### `page404` **React Component** *optional*
 
-A Rhaetia router.
-
----
-
-### `match(child_props)`
-
-Attempts to match the current url to a tree of React elements. This should be called on `this.router` in your `onDidNavigate()` function.
-
-#### Parameters
-
-##### `child_props` **Object**
-
-An object of properties that each React element matched by the current url should have.
-
-#### Return value
-
-A `React Element` matching the current url.
+Any React Component that you want to be shown when Rhaetia does not find a matching route, or when `show404()` is called.
 
 ---
 
@@ -376,21 +340,30 @@ A function that takes 2 arguments:
 
 2. `callback` - call this function with `true` if the user indicates that they do wish to leave a page, and with `false` if otherwise.
 
----
-
-### `set404()`
-
-Used to redirect to a 404 page without changing the url. In your top-level React component, create a function called `on404`. In this function, set `state.child` to your 404 component:
+As an example:
 
 ```javascript
-on404() {
-  this.setState({
-    child: (<Error404/>),
-  });
+// This custom function is passed to `setBlockDialog` as a custom user confirmation function.
+// If the response to an (imaginary) custom dialog is true, then it invokes the callback.
+// It receives the `message` from `block()`, but ignores it.
+openLeavePageDialog(message, callback) {
+  if (responseToCustomDialog() === true) {
+    callback();
+  }
+}
+
+componentDidMount() {
+  // If `setBlockDialog()` weren't called here, then the normal system dialog would appear when
+  // `block()` is triggered.
+  this.props.router.setBlockDialog(this.openLeavePageDialog.bind(this));
 }
 ```
 
-Then, whenever you wish to redirect to your 404 page, call:
+---
+
+### `show404()`
+
+Used to redirect to a 404 page without changing the url. Whenever you wish to redirect to your 404 page, call:
 
 ```javascript
 this.props.router.set404()

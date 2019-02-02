@@ -2,18 +2,18 @@
   "name": "rhaetia",
   "version": "0.2.4",
   "description": "A lightweight router for React",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "browser": "index.js",
+  "author": {
+    "name": "Mike Wang",
+    "email": "mikevonwang@gmail.com"
   },
-  "author": "Mike Wang <mikevonwang@gmail.com",
   "repository": "gitlab:mikevonwang/rhaetia",
   "license": "MIT",
   "dependencies": {
     "history": "^4.7.2"
   },
   "peerDependencies": {
-    "react": ">=15.0.0"
+    "react": ">=16.0.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",

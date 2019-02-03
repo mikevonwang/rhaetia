@@ -2,12 +2,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import createHistory from 'history/createBrowserHistory';
 
-let getUserConfirmation;
-
-const rhaetia_history = createHistory({
+class RhaetiaHistory {
+  static setBlockDialog(newGetUserConfirmation) {
+    this.getUserConfirmation = newGetUserConfirmation;
+  }
+}
+RhaetiaHistory.self = createHistory({
   getUserConfirmation: (message, callback) =>{
-    if (getUserConfirmation) {
-      getUserConfirmation(message, callback);
+    if (RhaetiaHistory.getUserConfirmation) {
+      RhaetiaHistory.getUserConfirmation(message, callback);
     }
     else {
       callback(window.confirm(message));
@@ -15,38 +18,20 @@ const rhaetia_history = createHistory({
   },
 });
 
-export class router {
+export class Router extends React.Component {
 
-  constructor(root, route_tree) {
-    if (!Object.getPrototypeOf(root).isReactComponent) {
-      throw new TypeError('root must be a React class component. Instead received: ' + String(root));
-      return null;
-    }
-    else if (typeof root.onDidNavigate !== 'function') {
-      throw new TypeError('onDidNavigate must be a function. Instead received: ' + String(root.onDidNavigate));
-      return null;
-    }
-    else if (!Array.isArray(route_tree)) {
-      throw new TypeError('route_tree must be an array. Instead received: ' + String(route_tree));
-      return null;
-    }
+  constructor(props) {
+    super(props);
+    this.state = {
+      router: this.getRouterObject(),
+      children: null,
+    };
+    this.routes = this.setRoutes(this.props.routeTree);
+    RhaetiaHistory.self.listen(this.match.bind(this));
+  }
 
-    this.set404 = this.set404.bind(root);
-
-    this.routes = this.setRoutes(route_tree);
-
-    this.path = this.getPath();
-    this.query = this.getQuery();
-
-    this.push = rhaetia_history.push;
-    this.replace = rhaetia_history.replace;
-    this.block = rhaetia_history.block;
-
-    rhaetia_history.listen(() => {
-      this.path = this.getPath();
-      this.query = this.getQuery();
-      root.onDidNavigate();
-    });
+  componentDidMount() {
+    this.match();
   }
 
   getPath() {
@@ -59,13 +44,25 @@ export class router {
 
   getQuery() {
     let query = {};
-    location.search.substring(1).split('&').forEach((c) => {
+    window.location.search.substring(1).split('&').forEach((c) => {
       let pair = c.split('=');
       if (pair.length === 2) {
         query[pair[0]] = pair[1];
       }
     });
     return query;
+  }
+
+  getRouterObject() {
+    return ({
+      setBlockDialog: this.setBlockDialog.bind(this),
+      show404: this.show404.bind(this),
+      push: RhaetiaHistory.self.push,
+      replace: RhaetiaHistory.self.replace,
+      block: RhaetiaHistory.self.block,
+      path: this.getPath(),
+      query: this.getQuery(),
+    });
   }
 
   setRoutes(route_tree, trunk = '', hierarchy = []) {
@@ -190,25 +187,8 @@ export class router {
     return route_array;
   }
 
-  match(child_props = {}) {
-    if (typeof child_props !== 'object') {
-      throw new TypeError('child_props must be an object. Instead received: ' + String(child_props));
-      return null;
-    }
-    else if (child_props.router !== undefined) {
-      throw new TypeError('child_props cannot have the property: ' + 'router');
-      return null;
-    }
-
-    child_props.router = {
-      push: this.push,
-      replace: this.replace,
-      block: this.block,
-      path: this.path,
-      query: this.query,
-      setBlockDialog: this.setBlockDialog,
-      set404: this.set404,
-    };
+  match() {
+    const router = this.getRouterObject();
 
     let child = null;
     for (let i=0; i<this.routes.length; i++) {
@@ -219,8 +199,8 @@ export class router {
       let params = Object.assign({}, route[3]);
 
       if (
-        ((route[2].match_mode === 'forgiving' || route[2].match_mode === 'loose') && (route_path.length > this.path.length)) ||
-        ((route[2].match_mode === 'exact') && (route_path.length !== this.path.length))
+        ((route[2].match_mode === 'forgiving' || route[2].match_mode === 'loose') && (route_path.length > router.path.length)) ||
+        ((route[2].match_mode === 'exact') && (route_path.length !== router.path.length))
       ) {
         is_match = false;
       }
@@ -228,36 +208,49 @@ export class router {
         for (let j=0; j<route_path.length; j++) {
           if (route_path[j][0] === ':') {
             const param_name = route_path[j].substring(1);
-            params[param_name] = (this.path[j] !== undefined && this.path[j] !== '') ? this.path[j] : null;
+            params[param_name] = (router.path[j] !== undefined && router.path[j] !== '') ? router.path[j] : null;
           }
-          else if (route_path[j] !== this.path[j]) {
+          else if (route_path[j] !== router.path[j]) {
             is_match = false;
           }
         }
       }
       if (is_match === true) {
-        child_props.router.params = params;
+        router.params = params;
         for (let j=hierarchy.length-1; j>=0; j--) {
-          child = React.createElement(hierarchy[j], child_props, child);
+          child = React.createElement(hierarchy[j], {router}, child);
         }
-        if (route[2].match_mode === 'forgiving' && route_path.length < this.path.length) {
-          this.replace('/' + this.path.slice(0,route_path.length).join('/'));
+        if (route[2].match_mode === 'forgiving' && route_path.length < router.path.length) {
+          this.replace('/' + router.path.slice(0,route_path.length).join('/'));
         }
         break;
       }
     }
-    return child;
+
+    this.setState({
+      children: child,
+      router: router,
+    });
   }
 
   setBlockDialog(newGetUserConfirmation) {
-    getUserConfirmation = newGetUserConfirmation;
+    RhaetiaHistory.setBlockDialog(newGetUserConfirmation);
   }
 
-  set404() {
-    this.on404();
+  show404() {
+    this.setState({
+      children: React.createElement(this.props.page404),
+    });
   }
 
-};
+  render() {
+    return Rhaetia.renderChild(this.props.children, {
+      router: this.state.router,
+      children: this.state.children,
+    });
+  }
+
+}
 
 export class A extends React.Component {
 
@@ -269,10 +262,10 @@ export class A extends React.Component {
     if (!this.props.target) {
       e.preventDefault();
       if (this.props.replace === true) {
-        rhaetia_history.replace(this.props.href);
+        RhaetiaHistory.self.replace(this.props.href);
       }
       else {
-        rhaetia_history.push(this.props.href);
+        RhaetiaHistory.self.push(this.props.href);
       }
     }
     if (this.props.onClick) {
@@ -303,7 +296,7 @@ export const renderChild = (child, props = {}) => {
 };
 
 const Rhaetia = {
-  router,
+  Router,
   A,
   renderChild,
 };

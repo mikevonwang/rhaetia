@@ -1,26 +1,27 @@
 {
   "name": "rhaetia",
   "version": "0.2.4",
-  "description": "A lightweight router for React",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "description": "A lightweight declarative router for React",
+  "browser": "index.js",
+  "author": {
+    "name": "Mike Wang",
+    "email": "mikevonwang@gmail.com"
   },
-  "author": "Mike Wang <mikevonwang@gmail.com",
-  "repository": "gitlab:mikevonwang/rhaetia",
+  "repository": "github:mikevonwang/rhaetia",
   "license": "MIT",
   "dependencies": {
     "history": "^4.7.2"
   },
   "peerDependencies": {
-    "react": ">=15.0.0"
+    "react": ">=16.0.0"
   },
   "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
-    "gulp": "^3.9.1",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
+    "gulp": "^4.0.0",
     "gulp-babel": "^7.0.0",
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^3.0.0"
-  }
+  },
+  "keywords": ["react","router","route","routing","history","link"]
 }

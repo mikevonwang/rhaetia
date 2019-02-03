@@ -1,13 +1,13 @@
 {
   "name": "rhaetia",
   "version": "0.2.4",
-  "description": "A lightweight router for React",
+  "description": "A lightweight declarative router for React",
   "browser": "index.js",
   "author": {
     "name": "Mike Wang",
     "email": "mikevonwang@gmail.com"
   },
-  "repository": "gitlab:mikevonwang/rhaetia",
+  "repository": "github:mikevonwang/rhaetia",
   "license": "MIT",
   "dependencies": {
     "history": "^4.7.2"
@@ -22,5 +22,6 @@
     "gulp-babel": "^7.0.0",
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^3.0.0"
-  }
+  },
+  "keywords": ["react","router","route","routing","history","link"]
 }

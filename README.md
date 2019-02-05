@@ -366,7 +366,7 @@ componentDidMount() {
 Used to redirect to a 404 page without changing the url. Whenever you wish to redirect to your 404 page, call:
 
 ```javascript
-this.props.router.set404()
+this.props.router.show404()
 ```
 
 ---

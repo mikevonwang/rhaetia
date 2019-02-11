@@ -118,7 +118,7 @@ render() {
 
 ### `<Rhaetia.Router/>`
 
-A Rhaetia router. Rhaetia.Router is a React Component, and should wrap your top-level Component (see step 3 in "Usage and Example" for an example). This Component can take two props: `routeTree` and `page404`.
+A Rhaetia router. Rhaetia.Router is a React Component, and should wrap your top-level Component (see step 3 in "Usage and Example" for an example). This Component can take three props: `routeTree`, `page404`, and `fallbackURL`.
 
 #### Props
 
@@ -297,6 +297,10 @@ If the 3rd item in this `route_branch` is `route_options`, then `route_children`
 
 Any React Component that you want to be shown when Rhaetia does not find a matching route, or when `show404()` is called.
 
+##### `fallbackURL` **string** *optional*
+
+The fallback url used by `toFallback()` (i.e. if `toFallback()` is used, `fallbackURL` must be defined). Useful for kicking an unauthenticated user out to a safe publicly-accessible URL.
+
 ---
 
 ### `push()`, `replace()`, `block()`
@@ -366,7 +370,17 @@ componentDidMount() {
 Used to redirect to a 404 page without changing the url. Whenever you wish to redirect to your 404 page, call:
 
 ```javascript
-this.props.router.show404()
+this.props.router.show404();
+```
+
+---
+
+### `toFallback()`
+
+Used to redirect to a a fallback URL. Requires the `fallbackURL` prop to be defined on your `Rhaetia.Router`. Whenever you wish to redirect to your fallback URL, call:
+
+```javascript
+this.props.router.toFallback();
 ```
 
 ---

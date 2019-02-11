@@ -222,7 +222,7 @@ export class Router extends React.Component {
           child = React.createElement(hierarchy[j], {router}, child);
         }
         if (route[2].match_mode === 'forgiving' && route_path.length < router.path.length) {
-          this.replace('/' + router.path.slice(0,route_path.length).join('/'));
+          RhaetiaHistory.self.replace('/' + router.path.slice(0,route_path.length).join('/'));
         }
         break;
       }

@@ -57,6 +57,7 @@ export class Router extends React.Component {
     return ({
       setBlockDialog: this.setBlockDialog.bind(this),
       show404: this.show404.bind(this),
+      toFallback: this.toFallback.bind(this),
       push: RhaetiaHistory.self.push,
       replace: RhaetiaHistory.self.replace,
       block: RhaetiaHistory.self.block,
@@ -221,7 +222,7 @@ export class Router extends React.Component {
           child = React.createElement(hierarchy[j], {router}, child);
         }
         if (route[2].match_mode === 'forgiving' && route_path.length < router.path.length) {
-          this.replace('/' + router.path.slice(0,route_path.length).join('/'));
+          RhaetiaHistory.self.replace('/' + router.path.slice(0,route_path.length).join('/'));
         }
         break;
       }
@@ -241,6 +242,15 @@ export class Router extends React.Component {
     this.setState({
       children: React.createElement(this.props.page404),
     });
+  }
+
+  toFallback() {
+    if (this.props.fallbackURL) {
+      RhaetiaHistory.self.replace(this.props.fallbackURL);
+    }
+    else {
+      throw new TypeError('Rhaetia.Router did not receive a fallbackURL prop.');
+    }
   }
 
   render() {

@@ -84,7 +84,7 @@ export class Router extends React.Component {
         throw new TypeError('route_branch[0] must be either null or a string. Instead received: ' + String(route[0]));
         return null;
       }
-      else if (!React.Component.isPrototypeOf(route[1])) {
+      else if (!React.Component.isPrototypeOf(route[1]) && typeof route[1] !== 'function') {
         throw new TypeError('route_branch[1] must be a React component. Instead received: ' + String(route[1]));
         return null;
       }

@@ -1,6 +1,6 @@
 {
   "name": "rhaetia",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "A lightweight declarative router for React",
   "browser": "index.js",
   "author": {

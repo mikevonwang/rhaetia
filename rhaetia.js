@@ -224,6 +224,10 @@ export class Router extends React.Component {
       }
     }
 
+    if (child === null) {
+      child = React.createElement(this.props.page404);
+    }
+
     this.setState({
       children: child,
       router: router,

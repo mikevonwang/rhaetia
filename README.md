@@ -8,7 +8,7 @@ Rhaetia is a lightweight declarative router for React.
 
 ## Usage and Example
 
-After installation, there are 6 main steps to implementing Rhaetia:
+After installation, there are 6 main steps to using Rhaetia:
 
 **1.** Import Rhaetia into your app at the top of each component you want to use it with:
 

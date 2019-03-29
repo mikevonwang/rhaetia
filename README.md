@@ -16,7 +16,7 @@ After installation, there are 6 main steps to using Rhaetia:
 import Rhaetia from 'rhaetia';
 ```
 
-If you use Webpack, you could instead include Rhaetia in Webpack's `providePlugin()`, and avoid having to write the above `import` statement over and over:
+If you use Webpack, you could instead include Rhaetia in Webpack's `ProvidePlugin()`, and avoid having to write the above `import` statement over and over:
 
 ```javascript
 plugins: [

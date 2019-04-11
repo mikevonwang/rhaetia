@@ -303,15 +303,13 @@ The fallback url used by `toFallback()` (i.e. if `toFallback()` is used, `fallba
 
 ---
 
-### `push()`, `replace()`, `block()`
+### `push()`, `replace()`
 
-Aliases of [`history.push()`, `history.replace()` and `history.block()`](https://github.com/ReactTraining/history#navigation).
+Aliases of [`history.push()` and `history.replace()`](https://github.com/ReactTraining/history#navigation).
 
 Use `push()` whenever you want the user to be able to use their browser's back button to return to the current route, e.g. when navigating to a new route upon a button click.
 
-Use `replace()` whenever you don't want the user to be able to use their browser's back button to return to the current route, e.g. when kicking the user out of a route they aren't allowed to view and onto one they are allowed to.
-
-Use `block()` whenever you want to ask the user for confirmation whether or not they actually wish to leave a page when they click a button or link that will navigate them away. This function returns another function, which you can store and then call to prevent the confirmation dialog from appearing.
+Use `replace()` whenever you don't want the user to be able to use their browser's back button to return to the current route, e.g. when kicking the user out of a route they *aren't* allowed to view and onto one they *are* allowed to.
 
 These functions should be called on `this.props.router`, i.e.
 
@@ -320,13 +318,6 @@ this.props.router.push('/settings');
 ```
 ```javascript
 this.props.router.replace('/login');
-```
-```javascript
-this.unblock = this.props.router.block((new_location) => {
-  if (location.pathname !== new_location.pathname) {
-    return ('Are you sure you wish to leave this page?');
-  }
-});
 ```
 ---
 
@@ -363,6 +354,92 @@ componentDidMount() {
 }
 ```
 
+#### Return value
+
+`void`
+
+---
+
+### `block()`
+
+Acts as a quasi-alias of [`history.block()`](https://github.com/ReactTraining/history#blocking-transitions).
+
+Use `block()` whenever you want to ask the user for confirmation as to whether or not they actually wish to leave a page when they click a button or link that will navigate them away.
+
+Unlike `history.block()`, which returns a function you can call to cancel the block, this function returns void. To cancel the block, call `unblock()`.
+
+This function should be called on `this.props.router`, i.e.
+
+```javascript
+this.props.router.block();
+```
+
+#### Parameters
+
+Accepts the same parameters as `history.block()`.
+
+#### Return value
+
+`void`
+
+---
+
+### `unblock()`
+
+Removes the block set by `block()`. If no block is set, nothing happens.
+
+This function should be called on `this.props.router`, i.e.
+
+```javascript
+this.props.router.unblock();
+```
+
+#### Parameters
+
+None.
+
+#### Return value
+
+`void`
+
+---
+
+### `isBlocked()`
+
+Used to determine if a history block is currently set or not. This is useful for stopping functions that would otherwise execute some steps *before* making a history `push` or `replace`.
+
+
+As an example:
+
+```javascript
+// Consider a page with a form and a logout button. The logout button runs some code before sending
+// the user back to the login page. If a user clicks the logout button on a page with a dirty form,
+// one would want a confirmation message to appear before the logout button carries out any steps:
+
+onLogout() {
+  if (this.props.router.isBlocked()) {
+    // Show confirmation message.
+    // ...
+    // If the user confirms, call `this.props.router.unblock()`,
+    // then call `this.onLogout()` again.
+  }
+  else {
+    // Do logout steps.
+    // ...
+    // Then push user to login page.
+    this.props.router.replace('/login');
+  }
+}
+```
+
+#### Parameters
+
+None.
+
+#### Return value
+
+`boolean`
+
 ---
 
 ### `show404()`
@@ -373,15 +450,31 @@ Used to redirect to a 404 page without changing the url. Whenever you wish to re
 this.props.router.show404();
 ```
 
+#### Parameters
+
+None.
+
+#### Return value
+
+`void`
+
 ---
 
 ### `toFallback()`
 
-Used to redirect to a a fallback URL. Requires the `fallbackURL` prop to be defined on your `Rhaetia.Router`. Whenever you wish to redirect to your fallback URL, call:
+Used to redirect to a fallback URL. Requires the `fallbackURL` prop to be defined on your `Rhaetia.Router`. Whenever you wish to redirect to your fallback URL, call:
 
 ```javascript
 this.props.router.toFallback();
 ```
+
+#### Parameters
+
+None.
+
+#### Return value
+
+`void`
 
 ---
 
@@ -389,7 +482,7 @@ this.props.router.toFallback();
 
 Used in React components that wrap other React components according to your `route_tree`.
 
-To use, place one `Rhaetia.renderChild()` in your React component wherever you want its child to appear;
+To use, place one `Rhaetia.renderChild()` in your React component wherever you want its child to appear:
 
 ```javascript
 <main>
@@ -417,7 +510,7 @@ A React element representing the child of this component.
 
 ### `<A/>`
 
-Wrapper for an `<a/>` tag with a valid `href` attribute, that uses `push()` (by default) to take the user to that `href`. Used for intra-app links in single page apps, where a regular `<a/>` tag is undesirable because it would cause the entire app to reload.
+Wrapper for an `<a/>` tag with a valid `href` attribute that uses `push()` (by default) to take the user to that `href`. Used for intra-app links in single page apps, where a regular `<a/>` tag is undesirable because it would cause the entire app to reload.
 
 To use, place a `<Rhaetia.A/>` in your React component wherever you want an intra-app link, and give it an `href` attribute;
 
@@ -428,7 +521,7 @@ To use, place a `<Rhaetia.A/>` in your React component wherever you want an intr
 The shorthand `<A/>` also exists. To use, either adjust your `import Rhaetia` statement to include `A`:
 
 ```javascript
-import Rhaetia, {A} from 'Rhaetia';
+import Rhaetia, { A } from 'Rhaetia';
 ```
 
 Or, if you use Webpack, adjust your `providePlugin()` to include `A`:

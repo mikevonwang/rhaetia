@@ -1,6 +1,6 @@
 # Rhaetia
 
-Rhaetia is a lightweight declarative router for React.
+Rhaetia is a lightweight static declarative router for React.
 
 ## Installation
 

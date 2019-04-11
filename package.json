@@ -1,7 +1,7 @@
 {
   "name": "rhaetia",
   "version": "0.3.4",
-  "description": "A lightweight declarative router for React",
+  "description": "A lightweight static declarative router for React",
   "browser": "index.js",
   "author": {
     "name": "Mike Wang",
@@ -23,5 +23,5 @@
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^3.0.0"
   },
-  "keywords": ["react","router","route","routing","history","link"]
+  "keywords": ["react","router","route","routing","history","link","static","declarative"]
 }

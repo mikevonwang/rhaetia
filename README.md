@@ -1,6 +1,6 @@
 # Rhaetia
 
-Rhaetia is a lightweight declarative router for React.
+Rhaetia is a lightweight static declarative router for React.
 
 ## Installation
 
@@ -8,7 +8,7 @@ Rhaetia is a lightweight declarative router for React.
 
 ## Usage and Example
 
-After installation, there are 6 main steps to implementing Rhaetia:
+After installation, there are 6 main steps to using Rhaetia:
 
 **1.** Import Rhaetia into your app at the top of each component you want to use it with:
 
@@ -16,7 +16,7 @@ After installation, there are 6 main steps to implementing Rhaetia:
 import Rhaetia from 'rhaetia';
 ```
 
-If you use Webpack, you could instead include Rhaetia in Webpack's `providePlugin()`, and avoid having to write the above `import` statement over and over:
+If you use Webpack, you could instead include Rhaetia in Webpack's `ProvidePlugin()`, and avoid having to write the above `import` statement over and over:
 
 ```javascript
 plugins: [
@@ -26,7 +26,7 @@ plugins: [
 ],
 ```
 
-**2.** In your top-level React file, create a `route_tree` array that defines your app's routes.
+**2.** In your top-level React Component, create a `route_tree` array that defines your app's routes.
 
 ```javascript
 const route_tree = [
@@ -38,7 +38,7 @@ const route_tree = [
 
   // These 4 routes are wrapped in a "Main" React Component.
   // The 2nd route has 2 children; the first child is marked as default.
-  // The 3rd and 4th routes include url parameters.
+  // The 3rd and 4th routes include URL parameters.
   [null, Main, [
     ['', Home],
     ['settings', Settings, [
@@ -118,7 +118,7 @@ render() {
 
 ### `<Rhaetia.Router/>`
 
-A Rhaetia router. Rhaetia.Router is a React Component, and should wrap your top-level Component (see step 3 in "Usage and Example" for an example). This Component can take three props: `routeTree`, `page404`, and `fallbackURL`.
+A Rhaetia router. `Rhaetia.Router` is a React Component, and should wrap your top-level Component (see step 3 in "Usage and Example" for an example). This Component can take three props: `routeTree`, `page404`, and `fallbackURL`.
 
 #### Props
 
@@ -126,23 +126,23 @@ A Rhaetia router. Rhaetia.Router is a React Component, and should wrap your top-
 
 A `route_tree` array detailing every route in the app.
 
-Every item in the array must be a `route_branch` array. These arrays must be ordered from most specific to most general, i.e. routes with url parameters should appear after routes without them. For example:
+Every item in the array must be a `route_branch` array. These arrays must be ordered from most specific to most general, i.e. routes with URL parameters should appear *after* routes without them. For example:
 
 ```javascript
 const route_tree = [
   ['settings', Settings],
   ['post/new', NewPost],
 
-  // This route_branch has a url parameter as its second route_path piece.
+  // This route_branch has a URL parameter as its second route_path piece.
   // Its partner above it has an identical first route_path piece, but a literal as its second
   // route_path piece.
-  // This route must therefore appear after its partner, otherwise a url like 'example.com/post/new'
+  // This route must therefore appear after its partner, otherwise a URL like 'example.com/post/new'
   // would match this route instead of its partner.
   ['post/:post_id', Post],
 
-  // This route_branch has a url parameter as its first route_path piece, and is therefore the most
+  // This route_branch has a URL parameter as its first route_path piece, and is therefore the most
   // general.
-  // It must be at the bottom, otherwise a url like 'example.com/settings' would match this
+  // It must be at the bottom, otherwise a URL like 'example.com/settings' would match this
   // route instead of the first one.
   [':username', Profile],
 ];
@@ -154,19 +154,19 @@ A 2-4 element array detailing a single route in the app. The elements are, in or
 
 **1.** `route_path` **String | null** *required*
 
-Used to match routes to the url.
+Used to match routes to the URL.
 
 If the `route_path` contains `/` characters, it is split along those characters into `route_path_piece`'s, and each `route_path_piece` compared individually.
 
 * `route_path_piece`'s beginning with an alphabetic character are treated as literal and exact matches.
 
-* `route_path_piece`'s beginning with `:` are treated as url parameters, with the value of the url parameter being stored under `this.props.params` with the piece as the key.
+* `route_path_piece`'s beginning with `:` are treated as URL parameters, with the value of the URL parameter being stored under `this.props.params` with the piece as the key.
 
-* `route_path_piece`'s beginning with `:` and ending with `?` are treated as optional url parameters. They behave just like normal url parameters, except when the url doesn't contain the parameter; in this case, `null` is stored in `this.props.params`. Only the last `route_path_piece` in a `route_path` may be an optional url parameter.
+* `route_path_piece`'s beginning with `:` and ending with `?` are treated as optional URL parameters. They behave just like normal URL parameters, except when the URL doesn't contain the parameter; in this case, `null` is stored in `this.props.params`. Only the last `route_path_piece` in a `route_path` may be an optional URL parameter.
 
 If the `route_path` is `null`, the `route_children` element of this `route_branch` must exist and will be examined for matching.
 
-If the url being matched against has query parameters, they will be stored in `this.props.query` as key-value pairs.
+If the URL being matched against has query parameters, they will be stored in `this.props.query` as key-value pairs.
 
 Consider the following examples:
 
@@ -194,7 +194,7 @@ Consider the following examples:
 //   'example.com/graphs/19'             renders  <Graph/>
 //   'example.com/graphs/19/reviews'     renders  <Graph><Review/></Graph>
 //   'example.com/graphs/19/reviews/75'  renders  <Graph><Review/></Graph>
-// With `graph` and `review_id` stored in `this.props.params` of each rendered element.
+// With `graph_id` and `review_id` stored in `this.props.params` of each rendered element.
 ['graphs/:graph_id?', Graph, [
   ['reviews/:review_id?', Review]
 ]],
@@ -210,7 +210,7 @@ The React element that matches a certain `route_path`. Multiple `route_branch` a
 
 **3.** `route_options` **Object** *optional*
 
-An object with properties declaring optional properties of this route. Valid properties are:
+An object with optional properties of this `route_branch`. Valid properties are:
 
 - `is_default` **Boolean**
 
@@ -227,7 +227,7 @@ An object with properties declaring optional properties of this route. Valid pro
   ]],
   ```
 
-  This is equivalent to just setting `route_path` to `''`. This example below behaves exactly like the one above:
+  This is equivalent to just duplicating the `route_branch` and setting the duplicate's `route_path` to `''`. This example below behaves exactly like the one above:
 
   ```javascript
   ['settings', Settings, [
@@ -249,19 +249,19 @@ An object with properties declaring optional properties of this route. Valid pro
   ['terms', Terms, {match_mode: 'exact'}],
   ```
 
-  If `'forgiving'`, then this route will match urls that have extra pieces beyond the pattern of its `route_path`. It will replace the url with one that matches the pattern of its `route_path`, i.e. it will truncate the url and remove the extra pieces.
+  If `'forgiving'`, then this route will match urls that have extra pieces beyond the pattern of its `route_path`. It will replace the URL with one that matches the pattern of its `route_path`, i.e. it will truncate the URL and remove the extra pieces.
 
   ```javascript
   // This route will match both `terms` and `terms/current`. In the latter case, it will replace
-  // the url with `terms`.
+  // the URL with `terms`.
   ['terms', Terms, {match_mode: 'forgiving'}],
   ```
 
-  If `'loose'`, then this route will also match urls that have extra pieces beyond the pattern of its `route_path`, but it will not truncate the url.
+  If `'loose'`, then this route will also match urls that have extra pieces beyond the pattern of its `route_path`, but it will not truncate the URL.
 
   ```javascript
   // This route will match both `terms` and `terms/current`. In the latter case, it will leave
-  // the url as `terms/current`.
+  // the URL as `terms/current`.
   ['terms', Terms, {match_mode: 'loose'}],
   ```
 
@@ -299,19 +299,17 @@ Any React Component that you want to be shown when Rhaetia does not find a match
 
 ##### `fallbackURL` **string** *optional*
 
-The fallback url used by `toFallback()` (i.e. if `toFallback()` is used, `fallbackURL` must be defined). Useful for kicking an unauthenticated user out to a safe publicly-accessible URL.
+The fallback URL used by `toFallback()` (i.e. if `toFallback()` is used, `fallbackURL` must be defined). Useful for kicking an unauthenticated user out to a safe publicly-accessible URL.
 
 ---
 
-### `push()`, `replace()`, `block()`
+### `push()`, `replace()`
 
-Aliases of [`history.push()`, `history.replace()` and `history.block()`](https://github.com/ReactTraining/history#navigation).
+Aliases of [`history.push()` and `history.replace()`](https://github.com/ReactTraining/history#navigation).
 
 Use `push()` whenever you want the user to be able to use their browser's back button to return to the current route, e.g. when navigating to a new route upon a button click.
 
-Use `replace()` whenever you don't want the user to be able to use their browser's back button to return to the current route, e.g. when kicking the user out of a route they aren't allowed to view and onto one they are allowed to.
-
-Use `block()` whenever you want to ask the user for confirmation whether or not they actually wish to leave a page when they click a button or link that will navigate them away. This function returns another function, which you can store and then call to prevent the confirmation dialog from appearing.
+Use `replace()` whenever you don't want the user to be able to use their browser's back button to return to the current route, e.g. when kicking the user out of a route they *aren't* allowed to view and onto one they *are* allowed to.
 
 These functions should be called on `this.props.router`, i.e.
 
@@ -320,13 +318,6 @@ this.props.router.push('/settings');
 ```
 ```javascript
 this.props.router.replace('/login');
-```
-```javascript
-this.unblock = this.props.router.block((new_location) => {
-  if (location.pathname !== new_location.pathname) {
-    return ('Are you sure you wish to leave this page?');
-  }
-});
 ```
 ---
 
@@ -363,25 +354,127 @@ componentDidMount() {
 }
 ```
 
+#### Return value
+
+`void`
+
+---
+
+### `block()`
+
+Acts as a quasi-alias of [`history.block()`](https://github.com/ReactTraining/history#blocking-transitions).
+
+Use `block()` whenever you want to ask the user for confirmation as to whether or not they actually wish to leave a page when they click a button or link that will navigate them away.
+
+Unlike `history.block()`, which returns a function you can call to cancel the block, this function returns void. To cancel the block, call `unblock()`.
+
+This function should be called on `this.props.router`, i.e.
+
+```javascript
+this.props.router.block();
+```
+
+#### Parameters
+
+Accepts the same parameters as `history.block()`.
+
+#### Return value
+
+`void`
+
+---
+
+### `unblock()`
+
+Removes the block set by `block()`. If no block is set, nothing happens.
+
+This function should be called on `this.props.router`, i.e.
+
+```javascript
+this.props.router.unblock();
+```
+
+#### Parameters
+
+None.
+
+#### Return value
+
+`void`
+
+---
+
+### `isBlocked()`
+
+Used to determine if a history block is currently set or not. This is useful for stopping functions that would otherwise execute some steps *before* making a history `push` or `replace`.
+
+
+As an example:
+
+```javascript
+// Consider a page with a form and a logout button. The logout button runs some code before sending
+// the user back to the login page. If a user clicks the logout button on a page with a dirty form,
+// one would want a confirmation message to appear before the logout button carries out any steps:
+
+onLogout() {
+  if (this.props.router.isBlocked()) {
+    // Show confirmation message.
+    // ...
+    // If the user confirms, call `this.props.router.unblock()`,
+    // then call `this.onLogout()` again.
+  }
+  else {
+    // Do logout steps.
+    // ...
+    // Then push user to login page.
+    this.props.router.replace('/login');
+  }
+}
+```
+
+#### Parameters
+
+None.
+
+#### Return value
+
+`boolean`
+
 ---
 
 ### `show404()`
 
-Used to redirect to a 404 page without changing the url. Whenever you wish to redirect to your 404 page, call:
+Used to redirect to a 404 page without changing the URL. Whenever you wish to redirect to your 404 page, call:
 
 ```javascript
 this.props.router.show404();
 ```
 
+#### Parameters
+
+None.
+
+#### Return value
+
+`void`
+
 ---
 
 ### `toFallback()`
 
-Used to redirect to a a fallback URL. Requires the `fallbackURL` prop to be defined on your `Rhaetia.Router`. Whenever you wish to redirect to your fallback URL, call:
+Used to redirect to a fallback URL. Requires the `fallbackURL` prop to be defined on your `Rhaetia.Router`. Whenever you wish to redirect to your fallback URL, call:
 
 ```javascript
 this.props.router.toFallback();
 ```
+
+#### Parameters
+
+None.
+
+#### Return value
+
+`void`
 
 ---
 
@@ -389,7 +482,7 @@ this.props.router.toFallback();
 
 Used in React components that wrap other React components according to your `route_tree`.
 
-To use, place one `Rhaetia.renderChild()` in your React component wherever you want its child to appear;
+To use, place one `Rhaetia.renderChild()` in your React component wherever you want its child to appear:
 
 ```javascript
 <main>
@@ -417,7 +510,7 @@ A React element representing the child of this component.
 
 ### `<A/>`
 
-Wrapper for an `<a/>` tag with a valid `href` attribute, that uses `push()` (by default) to take the user to that `href`. Used for intra-app links in single page apps, where a regular `<a/>` tag is undesirable because it would cause the entire app to reload.
+Wrapper for an `<a/>` tag with a valid `href` attribute that uses `push()` (by default) to take the user to that `href`. Used for intra-app links in single page apps, where a regular `<a/>` tag is undesirable because it would cause the entire app to reload.
 
 To use, place a `<Rhaetia.A/>` in your React component wherever you want an intra-app link, and give it an `href` attribute;
 
@@ -428,7 +521,7 @@ To use, place a `<Rhaetia.A/>` in your React component wherever you want an intr
 The shorthand `<A/>` also exists. To use, either adjust your `import Rhaetia` statement to include `A`:
 
 ```javascript
-import Rhaetia, {A} from 'Rhaetia';
+import Rhaetia, { A } from 'Rhaetia';
 ```
 
 Or, if you use Webpack, adjust your `providePlugin()` to include `A`:

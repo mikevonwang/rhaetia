@@ -27,6 +27,7 @@ export class Router extends React.Component {
       children: null,
     };
     this.routes = this.setRoutes(this.props.routeTree);
+    this.unblocker = null;
     RhaetiaHistory.self.listen(this.match.bind(this));
   }
 
@@ -60,7 +61,9 @@ export class Router extends React.Component {
       toFallback: this.toFallback.bind(this),
       push: RhaetiaHistory.self.push,
       replace: RhaetiaHistory.self.replace,
-      block: RhaetiaHistory.self.block,
+      block: this.block.bind(this),
+      unblock: this.unblock.bind(this),
+      isBlocked: () => this.unblocker !== null,
       path: this.getPath(),
       query: this.getQuery(),
     });
@@ -232,6 +235,20 @@ export class Router extends React.Component {
       children: child,
       router: router,
     });
+  }
+
+  block(blocking_function = 'Are you sure you want to leave this page?') {
+    if (this.unblocker) {
+      this.unblocker();
+    }
+    this.unblocker = RhaetiaHistory.self.block(blocking_function);
+  }
+
+  unblock() {
+    if (this.unblocker) {
+      this.unblocker();
+    }
+    this.unblocker = null;
   }
 
   setBlockDialog(newGetUserConfirmation) {

@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import createHistory from 'history/createBrowserHistory';
+import { createBrowserHistory } from 'history'
 
 class RhaetiaHistory {
   static setBlockDialog(newGetUserConfirmation) {
     this.getUserConfirmation = newGetUserConfirmation;
   }
 }
-RhaetiaHistory.self = createHistory({
+RhaetiaHistory.self = createBrowserHistory({
   getUserConfirmation: (message, callback) =>{
     if (RhaetiaHistory.getUserConfirmation) {
       RhaetiaHistory.getUserConfirmation(message, callback);

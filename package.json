@@ -23,5 +23,14 @@
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^3.0.0"
   },
-  "keywords": ["react","router","route","routing","history","link","static","declarative"]
+  "keywords": [
+    "react",
+    "router",
+    "route",
+    "routing",
+    "history",
+    "link",
+    "static",
+    "declarative"
+  ]
 }

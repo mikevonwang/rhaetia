@@ -5,7 +5,7 @@ var babel = require('gulp-babel');
 
 function task_js() {
   return gulp.src('rhaetia.js')
-  .pipe(babel({presets: ['env']}))
+  .pipe(babel({presets: ['@babel/env']}))
   .on('error', function(err) {
     console.error('[Compilation Error]');
     console.error(err.message + '\n');

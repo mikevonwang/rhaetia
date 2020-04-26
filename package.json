@@ -16,10 +16,10 @@
     "react": ">=16.0.0"
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-preset-env": "^1.7.0",
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
     "gulp": "^4.0.0",
-    "gulp-babel": "^7.0.0",
+    "gulp-babel": "^8.0.0",
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^3.0.0"
   },
